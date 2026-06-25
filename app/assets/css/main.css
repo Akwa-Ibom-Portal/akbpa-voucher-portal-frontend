@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --color-akbpaGreen-50: #e6f5ef;
+  --color-akbpaGreen-100: #c0e6d6;
+  --color-akbpaGreen-200: #96d6bb;
+  --color-akbpaGreen-300: #69c59e;
+  --color-akbpaGreen-400: #3fca90;
+  --color-akbpaGreen-500: #007d53;
+  --color-akbpaGreen-600: #00714a;
+  --color-akbpaGreen-700: #006140;
+  --color-akbpaGreen-800: #004f34;
+  --color-akbpaGreen-900: #003c27;
+  --color-akbpaGreen-950: #00291a;
+
+  --color-akbpaOrange-50: #fff4e8;
+  --color-akbpaOrange-100: #ffe2bf;
+  --color-akbpaOrange-200: #ffc685;
+  --color-akbpaOrange-300: #ffa64d;
+  --color-akbpaOrange-400: #fa8c23;
+  --color-akbpaOrange-500: #f5800f;
+  --color-akbpaOrange-600: #db6c08;
+  --color-akbpaOrange-700: #b85607;
+  --color-akbpaOrange-800: #93420a;
+  --color-akbpaOrange-900: #76360e;
+  --color-akbpaOrange-950: #401a06;
+}
+
+body {
+  @apply antialiased bg-gray-50 dark:bg-gray-950;
+}
+
+.pill-btn {
+  border-radius: 9999px !important;
+}
