@@ -104,7 +104,12 @@ const auth = useAuthStore()
 const lgaStore = useLgaStore()
 const { visibleItems } = useNav()
 
-onMounted(() => lgaStore.ensureLoaded())
+// Refresh the signed-in user from /me once per admin session — catches role/profile
+// changes made elsewhere and confirms the cached session is still valid server-side.
+onMounted(() => {
+  lgaStore.ensureLoaded()
+  auth.fetchMe().catch(() => {})
+})
 
 const mobileNavOpen = ref(false)
 const route = useRoute()

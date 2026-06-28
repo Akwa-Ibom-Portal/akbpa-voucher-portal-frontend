@@ -39,16 +39,20 @@
     </UCard>
 
     <UCard>
-      <div class="grid sm:grid-cols-2 gap-3 mb-4">
-        <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search name or email..." @keyup.enter="store.fetchUsers()" />
-        <USelect v-model="roleFilterLabel" :items="['All Roles', ...USER_ROLES.map(r => r.label)]" @change="onRoleFilterChange" />
+      <div class="flex flex-wrap items-end gap-3 mb-4">
+        <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search name or email..." class="flex-1 min-w-48" @keyup.enter="store.fetchUsers()" />
+        <USelect v-model="roleFilterLabel" :items="['All Roles', ...USER_ROLES.map(r => r.label)]" class="min-w-48" @change="onRoleFilterChange" />
+        <UButton color="neutral" variant="outline" icon="i-lucide-rotate-ccw" @click="resetFilters">Reset Filters</UButton>
       </div>
       <UAlert v-if="store.error" color="error" variant="subtle" :title="store.error" class="mb-4" />
-      <UTable :data="store.users" :columns="columns" :loading="store.loading">
+      <UTable :data="paginated" :columns="columns" :loading="store.loading">
         <template #status-cell="{ row }">
           <UBadge :color="statusColor(row.original.status)" variant="subtle">{{ row.original.status }}</UBadge>
         </template>
       </UTable>
+      <div v-if="total > pageSize" class="flex justify-end mt-4">
+        <UPagination v-model:page="page" :total="total" :items-per-page="pageSize" />
+      </div>
     </UCard>
 
     <!-- Add User modal -->
@@ -111,9 +115,18 @@ onMounted(async () => {
 const roleFilterLabel = ref('All Roles')
 const actingOn = ref('')
 
+const { page, total, pageSize, paginated } = usePagination(() => store.users, 10)
+
 function onRoleFilterChange() {
   const match = USER_ROLES.find(r => r.label === roleFilterLabel.value)
   store.roleFilter = (match?.value ?? 'All Roles') as UserRole | 'All Roles'
+  store.fetchUsers()
+}
+
+function resetFilters() {
+  store.search = ''
+  roleFilterLabel.value = 'All Roles'
+  store.roleFilter = 'All Roles'
   store.fetchUsers()
 }
 
@@ -199,8 +212,10 @@ async function onAddUser() {
       password: addUserForm.password,
       roleId: addUserForm.roleId,
       roleName: selectedRoleName.value as UserRole,
-      lgaIds: addUserForm.lgaId ? [addUserForm.lgaId] : undefined,
-      wardIds: addUserForm.wardId ? [addUserForm.wardId] : undefined,
+      // The LGA picker is also used to filter the ward dropdown for ward-scoped roles, but the
+      // API rejects a request that sets both — only send whichever scope the role actually needs.
+      lgaIds: needsWard.value ? undefined : (addUserForm.lgaId ? [addUserForm.lgaId] : undefined),
+      wardIds: needsWard.value ? (addUserForm.wardId ? [addUserForm.wardId] : undefined) : undefined,
     })
     addUserModalOpen.value = false
     addUserForm.fullName = ''

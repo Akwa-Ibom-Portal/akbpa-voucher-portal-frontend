@@ -18,6 +18,9 @@
         <USelect v-model="statusFilter" :items="['All Status', 'Generated', 'Allocated', 'Issued', 'Redeemed', 'Expired']" />
         <USelect v-model="genderFilter" :items="['All Genders', 'Male', 'Female']" />
       </div>
+      <div class="flex justify-end mt-3">
+        <UButton color="neutral" variant="outline" icon="i-lucide-rotate-ccw" @click="resetFilters">Reset Filters</UButton>
+      </div>
     </UCard>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -29,7 +32,10 @@
 
     <UCard>
       <template #header><p class="font-semibold text-gray-900 dark:text-white">By Local Government Area</p></template>
-      <UTable :data="reportsStore.byLga" :columns="lgaColumns" :loading="reportsStore.loading" />
+      <UTable :data="lgaPaginated" :columns="lgaColumns" :loading="reportsStore.loading" />
+      <div v-if="lgaTotal > lgaPageSize" class="flex justify-end mt-4">
+        <UPagination v-model:page="lgaPage" :total="lgaTotal" :items-per-page="lgaPageSize" />
+      </div>
     </UCard>
 
     <UCard>
@@ -61,6 +67,18 @@ function onFilterChange() {
   reportsStore.itemFilter = (itemFilter.value === 'All Items' ? '' : itemFilter.value) as any
   reportsStore.fetchAll()
 }
+
+function resetFilters() {
+  lgaFilterName.value = 'All LGAs'
+  itemFilter.value = 'All Items'
+  statusFilter.value = 'All Status'
+  genderFilter.value = 'All Genders'
+  reportsStore.lgaFilter = ''
+  reportsStore.itemFilter = ''
+  reportsStore.fetchAll()
+}
+
+const { page: lgaPage, total: lgaTotal, pageSize: lgaPageSize, paginated: lgaPaginated } = usePagination(() => reportsStore.byLga, 10)
 
 const statCards = computed(() => [
   { label: 'Generated', value: reportsStore.summary.generated },

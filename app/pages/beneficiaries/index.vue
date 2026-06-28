@@ -12,18 +12,14 @@
     </div>
 
     <UCard>
-      <div class="grid sm:grid-cols-4 gap-3 mb-4">
-        <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search name, ID, phone..." class="sm:col-span-2" @keyup.enter="onSearch" />
-        <USelect v-model="lgaFilterName" :items="lgaOptionNames" placeholder="All LGAs" @change="onSearch" />
-        <USelect v-model="store.genderFilter" :items="['All', 'Male', 'Female']" placeholder="All genders" @change="onSearch" />
+      <div class="flex flex-wrap items-end gap-3 mb-4">
+        <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search name, ID, phone..." class="flex-1 min-w-48" @keyup.enter="onSearch" />
+        <USelect v-model="lgaFilterName" :items="lgaOptionNames" placeholder="All LGAs" class="min-w-40" :disabled="auth.role === 'Ward PA / Issuing Officer'" @change="onSearch" />
+        <USelect v-model="store.genderFilter" :items="['All', 'Male', 'Female']" placeholder="All genders" class="min-w-36" @change="onSearch" />
+        <UButton color="neutral" variant="outline" icon="i-lucide-rotate-ccw" @click="resetFilters">Reset Filters</UButton>
       </div>
 
-      <div v-if="store.loading" class="py-10 text-center text-sm text-gray-400">
-        <UIcon name="i-lucide-loader-2" class="size-5 animate-spin mx-auto mb-2" />
-        Loading beneficiaries…
-      </div>
-
-      <UTable v-else :data="store.beneficiaries" :columns="columns">
+      <UTable :data="paginated" :columns="columns" :loading="store.loading">
         <template #beneficiary-cell="{ row }">
           <div>
             <p class="font-medium text-gray-900 dark:text-white">{{ row.original.firstName }} {{ row.original.surname }}</p>
@@ -40,6 +36,9 @@
           </UBadge>
         </template>
       </UTable>
+      <div v-if="total > pageSize" class="flex justify-end mt-4">
+        <UPagination v-model:page="page" :total="total" :items-per-page="pageSize" />
+      </div>
     </UCard>
   </div>
 </template>
@@ -68,6 +67,17 @@ onMounted(async () => {
 function onSearch() {
   const lga = lgaStore.lgas.find(l => l.name === lgaFilterName.value)
   store.lgaFilter = lga?.id ?? ''
+  store.fetchBeneficiaries()
+}
+
+const { page, total, pageSize, paginated } = usePagination(() => store.beneficiaries, 10)
+
+function resetFilters() {
+  store.search = ''
+  store.genderFilter = 'All'
+  // Ward PA stays hard-scoped to their own ward — only the LGA picker resets for them.
+  lgaFilterName.value = 'All LGAs'
+  store.lgaFilter = ''
   store.fetchBeneficiaries()
 }
 

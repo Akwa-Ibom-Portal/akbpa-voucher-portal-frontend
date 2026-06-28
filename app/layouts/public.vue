@@ -36,7 +36,7 @@
         <NuxtLink to="/eligibility" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-akbpaGreen-50 dark:hover:bg-gray-800" @click="mobileMenuOpen = false">Eligibility</NuxtLink>
         <NuxtLink to="/faq" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-akbpaGreen-50 dark:hover:bg-gray-800" @click="mobileMenuOpen = false">FAQs</NuxtLink>
         <div class="flex gap-2 pt-2">
-          <UButton to="/register" color="neutral" variant="outline" block class="pill-btn" @click="mobileMenuOpen = false">Register</UButton>
+          <!-- <UButton to="/register" color="neutral" variant="outline" block class="pill-btn" @click="mobileMenuOpen = false">Register</UButton> -->
           <UButton to="/login" color="primary" block class="pill-btn" @click="mobileMenuOpen = false">Login</UButton>
         </div>
       </div>

@@ -6,11 +6,15 @@
     </div>
 
     <UCard>
-      <div class="grid sm:grid-cols-3 gap-3 mb-4">
-        <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search action, user, record..." class="sm:col-span-2" @keyup.enter="store.fetchLogs()" />
-        <USelect v-model="store.moduleFilter" :items="['All Modules', 'vouchers', 'redemption', 'users', 'beneficiaries']" @change="store.fetchLogs()" />
+      <div class="flex flex-wrap items-end gap-3 mb-4">
+        <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search action, user, record..." class="flex-1 min-w-48" @keyup.enter="store.fetchLogs()" />
+        <USelect v-model="store.moduleFilter" :items="['All Modules', 'vouchers', 'redemption', 'users', 'beneficiaries']" class="min-w-44" @change="store.fetchLogs()" />
+        <UButton color="neutral" variant="outline" icon="i-lucide-rotate-ccw" @click="resetFilters">Reset Filters</UButton>
       </div>
-      <UTable :data="store.logs" :columns="columns" :loading="store.loading" />
+      <UTable :data="paginated" :columns="columns" :loading="store.loading" />
+      <div v-if="total > pageSize" class="flex justify-end mt-4">
+        <UPagination v-model:page="page" :total="total" :items-per-page="pageSize" />
+      </div>
     </UCard>
   </div>
 </template>
@@ -20,6 +24,14 @@ definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Ad
 
 const store = useAuditLogsStore()
 onMounted(() => store.fetchLogs())
+
+const { page, total, pageSize, paginated } = usePagination(() => store.logs, 10)
+
+function resetFilters() {
+  store.search = ''
+  store.moduleFilter = 'All Modules'
+  store.fetchLogs()
+}
 
 const columns = [
   { accessorKey: 'createdAt', header: 'Time', cell: ({ row }: any) => new Date(row.getValue('createdAt')).toLocaleString() },

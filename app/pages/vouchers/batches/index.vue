@@ -9,7 +9,7 @@
     </div>
 
     <UCard>
-      <UTable :data="vouchersStore.batches" :columns="columns" :loading="vouchersStore.loading">
+      <UTable :data="paginated" :columns="columns" :loading="vouchersStore.loading">
         <template #batchCode-cell="{ row }">
           <NuxtLink :to="`/vouchers/batches/${row.original.id}`" class="font-medium text-akbpaGreen-700 hover:underline">
             {{ row.original.batchCode }}
@@ -19,6 +19,9 @@
           <UBadge :color="statusColor(row.original.status)" variant="subtle">{{ row.original.status }}</UBadge>
         </template>
       </UTable>
+      <div v-if="total > pageSize" class="flex justify-end mt-4">
+        <UPagination v-model:page="page" :total="total" :items-per-page="pageSize" />
+      </div>
     </UCard>
   </div>
 </template>
@@ -28,6 +31,8 @@ definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Ad
 
 const vouchersStore = useVouchersStore()
 onMounted(() => vouchersStore.fetchBatches())
+
+const { page, total, pageSize, paginated } = usePagination(() => vouchersStore.batches, 10)
 
 const columns = [
   { accessorKey: 'batchCode', header: 'Batch' },
