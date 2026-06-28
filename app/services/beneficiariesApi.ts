@@ -1,70 +1,93 @@
-import type { Beneficiary } from '~/types'
-import { mockBeneficiaries } from '~/data/mock'
-import { lgas } from '~/data/lgas'
-import { mockDelay } from '~/composables/useHttp'
+import type { Beneficiary, BeneficiaryVoucherHistoryEntry, PagedResult } from '~/types'
+import { normalizeBeneficiary, normalizeVoucherHistoryEntry } from '~/services/normalizeBeneficiary'
 
 export interface BeneficiaryListParams {
   search?: string
   lgaId?: string
   wardId?: string
   gender?: 'Male' | 'Female' | 'All'
+  page?: number
+  limit?: number
 }
 
-export async function listBeneficiaries(params: BeneficiaryListParams = {}): Promise<Beneficiary[]> {
-  const { http, useMock } = useHttp()
-  if (!useMock) {
-    const { data } = await http.get('/beneficiaries', { params })
-    return data
-  }
-
-  await mockDelay()
-  return mockBeneficiaries.filter((b) => {
-    const matchesSearch = !params.search || `${b.firstName} ${b.surname} ${b.beneficiaryCode} ${b.phone}`.toLowerCase().includes(params.search.toLowerCase())
-    const matchesLga = !params.lgaId || b.lgaId === params.lgaId
-    const matchesWard = !params.wardId || b.wardId === params.wardId
-    const matchesGender = !params.gender || params.gender === 'All' || b.gender === params.gender
-    return matchesSearch && matchesLga && matchesWard && matchesGender
+export async function listBeneficiaries(params: BeneficiaryListParams = {}): Promise<PagedResult<Beneficiary>> {
+  const { http } = useHttp()
+  const { data } = await http.get('/beneficiaries', {
+    params: {
+      search: params.search || undefined,
+      lgaId: params.lgaId || undefined,
+      wardId: params.wardId || undefined,
+      gender: params.gender && params.gender !== 'All' ? params.gender : undefined,
+      page: params.page,
+      limit: params.limit,
+    },
   })
-}
-
-export async function addBeneficiary(payload: Omit<Beneficiary, 'id' | 'voucherStatus'>): Promise<Beneficiary> {
-  const { http, useMock } = useHttp()
-  if (!useMock) {
-    const { data } = await http.post('/beneficiaries', payload)
-    return data
-  }
-  await mockDelay()
-  const duplicate = mockBeneficiaries.find(b => b.beneficiaryCode === payload.beneficiaryCode || b.householdId === payload.householdId)
-  if (duplicate) throw new Error(`Duplicate — ${payload.beneficiaryCode} or household ID already exists.`)
-
-  const created: Beneficiary = {
-    ...payload,
-    id: `b-${Date.now()}`,
-    voucherStatus: { Rice: 'Pending', Beans: 'Pending', Garri: 'Pending' },
-  }
-  mockBeneficiaries.push(created)
-  return created
-}
-
-export async function uploadBeneficiariesExcel(file: File): Promise<{ inserted: number; errors: string[] }> {
-  const { http, useMock } = useHttp()
-  if (!useMock) {
-    const formData = new FormData()
-    formData.append('file', file)
-    const { data } = await http.post('/beneficiaries/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-    return data
-  }
-  await mockDelay(1200)
-  // Mock row-level validation response shape, matching the real ExcelService contract.
+  const body = data.data ?? data
+  const list = body.beneficiaries ?? body
   return {
-    inserted: 187,
-    errors: [
-      'Row 42: Duplicate — RC10433 already exists',
-      `Row 88: Unknown ward 'Mbiabong East' for LGA 'Uyo'`,
-    ],
+    items: list.map(normalizeBeneficiary),
+    pagination: body.pagination ?? { page: 1, limit: list.length, total: list.length, pages: 1 },
   }
 }
 
-export function lgaNameFor(lgaId: string) {
-  return lgas.find(l => l.id === lgaId)?.name ?? ''
+export async function getBeneficiary(id: string): Promise<Beneficiary> {
+  const { http } = useHttp()
+  const { data } = await http.get(`/beneficiaries/${id}`)
+  const body = data.data ?? data
+  return normalizeBeneficiary(body.beneficiary ?? body)
+}
+
+export interface CreateBeneficiaryDto {
+  beneficiaryCode: string
+  fullName: string
+  gender: 'Male' | 'Female'
+  phone?: string
+  lgaId: string
+  wardId: string
+  address?: string
+  householdSize?: number
+}
+
+export async function addBeneficiary(payload: CreateBeneficiaryDto): Promise<Beneficiary> {
+  const { http } = useHttp()
+  const { data } = await http.post('/beneficiaries', payload)
+  const body = data.data ?? data
+  return normalizeBeneficiary(body.beneficiary ?? body)
+}
+
+export interface UpdateBeneficiaryDto {
+  fullName?: string
+  phone?: string
+  status?: 'Active' | 'Inactive'
+}
+
+export async function updateBeneficiary(id: string, payload: UpdateBeneficiaryDto): Promise<Beneficiary> {
+  const { http } = useHttp()
+  const { data } = await http.put(`/beneficiaries/${id}`, payload)
+  const body = data.data ?? data
+  return normalizeBeneficiary(body.beneficiary ?? body)
+}
+
+export async function downloadBeneficiaryTemplate(): Promise<Blob> {
+  const { http } = useHttp()
+  const { data } = await http.get('/beneficiaries/template/download', { responseType: 'blob' })
+  return data
+}
+
+export async function uploadBeneficiariesCsv(csv: string): Promise<{ inserted: number; errors: string[] }> {
+  const { http } = useHttp()
+  const { data } = await http.post('/beneficiaries/upload', csv, { headers: { 'Content-Type': 'text/csv' } })
+  const body = data.data ?? data
+  return {
+    inserted: body.inserted ?? body.insertedCount ?? 0,
+    errors: body.errors ?? [],
+  }
+}
+
+export async function getBeneficiaryVoucherHistory(id: string): Promise<BeneficiaryVoucherHistoryEntry[]> {
+  const { http } = useHttp()
+  const { data } = await http.get(`/beneficiaries/${id}/voucher-history`)
+  const body = data.data ?? data
+  const list = body.history ?? body.vouchers ?? body
+  return list.map(normalizeVoucherHistoryEntry)
 }

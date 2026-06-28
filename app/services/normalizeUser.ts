@@ -10,6 +10,7 @@ export function normalizeUser(raw: any, fallbackRole?: UserRole): User {
     email: raw.email,
     phone: raw.phone ?? undefined,
     role: (raw.role ?? fallbackRole ?? '') as UserRole,
+    roleId: raw.roleId !== undefined ? String(raw.roleId) : (raw.role_id !== undefined ? String(raw.role_id) : undefined),
     lgaIds: (raw.scopes?.lgas ?? raw.lgaIds ?? []).map(String),
     wardIds: (raw.scopes?.wards ?? raw.wardIds ?? []).map(String),
     isActive,

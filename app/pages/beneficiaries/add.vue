@@ -10,14 +10,8 @@
         <UFormField label="Beneficiary ID" name="beneficiaryCode">
           <UInput v-model="form.beneficiaryCode" placeholder="RC10501" class="w-full" />
         </UFormField>
-        <UFormField label="Household ID" name="householdId">
-          <UInput v-model="form.householdId" placeholder="HH-50101" class="w-full" />
-        </UFormField>
-        <UFormField label="First Name" name="firstName">
-          <UInput v-model="form.firstName" class="w-full" />
-        </UFormField>
-        <UFormField label="Surname" name="surname">
-          <UInput v-model="form.surname" class="w-full" />
+        <UFormField label="Full Name" name="fullName">
+          <UInput v-model="form.fullName" class="w-full" />
         </UFormField>
         <UFormField label="Gender" name="gender">
           <USelect v-model="form.gender" :items="['Male', 'Female']" class="w-full" />
@@ -25,8 +19,8 @@
         <UFormField label="Phone Number" name="phone">
           <UInput v-model="form.phone" placeholder="080XXXXXXXX" class="w-full" />
         </UFormField>
-        <UFormField label="NIN" name="nin">
-          <UInput v-model="form.nin" placeholder="National Identification Number" class="w-full" />
+        <UFormField label="Household Size" name="householdSize">
+          <UInput v-model.number="form.householdSize" type="number" min="1" class="w-full" />
         </UFormField>
         <UFormField label="LGA" name="lgaId">
           <USelect v-model="form.lgaId" :items="lgaOptions" class="w-full" @change="form.wardId = ''" />
@@ -58,8 +52,8 @@ const beneficiariesStore = useBeneficiariesStore()
 onMounted(() => lgaStore.ensureLoaded())
 
 const form = reactive({
-  beneficiaryCode: '', householdId: '', firstName: '', surname: '',
-  gender: 'Female' as 'Male' | 'Female', phone: '', nin: '', lgaId: '', wardId: '', address: '',
+  beneficiaryCode: '', fullName: '',
+  gender: 'Female' as 'Male' | 'Female', phone: '', householdSize: 1, lgaId: '', wardId: '', address: '',
 })
 const submitted = ref(false)
 const loading = ref(false)
@@ -75,20 +69,17 @@ async function onSubmit() {
   try {
     await beneficiariesStore.addBeneficiary({
       beneficiaryCode: form.beneficiaryCode,
-      householdId: form.householdId,
-      firstName: form.firstName,
-      surname: form.surname,
+      fullName: form.fullName,
       gender: form.gender,
-      phone: form.phone,
-      nin: form.nin,
+      phone: form.phone || undefined,
       lgaId: form.lgaId,
       wardId: form.wardId,
-      address: form.address,
-      community: lgaStore.wardName(form.wardId),
+      address: form.address || undefined,
+      householdSize: form.householdSize || undefined,
     })
     submitted.value = true
   } catch (e: any) {
-    error.value = e.message ?? 'Failed to add beneficiary'
+    error.value = e.response?.data?.message ?? e.message ?? 'Failed to add beneficiary'
   } finally {
     loading.value = false
   }

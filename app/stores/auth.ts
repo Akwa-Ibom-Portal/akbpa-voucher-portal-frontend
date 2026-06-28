@@ -30,18 +30,6 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = await authApi.getMe()
   }
 
-  async function requestEmailVerification(email: string) {
-    return authApi.requestEmailVerification(email)
-  }
-
-  async function verifyEmailCode(email: string, code: string) {
-    return authApi.verifyEmailCode(email, code)
-  }
-
-  async function submitRegistration(profile: Record<string, any>) {
-    return authApi.submitRegistration(profile)
-  }
-
   async function requestPasswordReset(email: string) {
     await authApi.requestPasswordReset(email)
   }
@@ -69,7 +57,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     token, user, loading, isAuthenticated, role,
     login, fetchMe, logout,
-    requestEmailVerification, verifyEmailCode, submitRegistration,
     requestPasswordReset, resetPassword, changePassword, updateProfile,
   }
 })

@@ -21,8 +21,6 @@ export default defineNuxtConfig({
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api',
       apiTimeout: Number(process.env.NUXT_PUBLIC_API_TIMEOUT || 15000),
-      useMockApi: process.env.NUXT_PUBLIC_USE_MOCK_API !== 'false',
-      mockDelay: Number(process.env.NUXT_PUBLIC_MOCK_DELAY || 350),
     },
   },
 

@@ -3,11 +3,19 @@
     <div class="lg:col-span-2 space-y-6">
       <div>
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">Generate Secured QR Vouchers</h1>
-        <p class="text-sm text-gray-500">Production Run · each voucher carries a unique serial and SHA-256 hashed token.</p>
+        <p class="text-sm text-gray-500">Production Run · each voucher carries a unique serial and a hashed token.</p>
       </div>
 
       <UCard>
         <UForm :state="form" class="space-y-5" @submit="onGenerate">
+          <UFormField label="Programme Cycle" name="programmeCycleId" required>
+            <USelect v-model="form.programmeCycleId" :items="cycleOptions" placeholder="Select a programme cycle" class="w-full" />
+          </UFormField>
+
+          <UFormField label="Batch Code" name="batchCode" required>
+            <UInput v-model="form.batchCode" placeholder="B-RC-2026-001" class="w-full" />
+          </UFormField>
+
           <UFormField label="Stable Food Item" name="foodItem">
             <div class="grid grid-cols-3 gap-3">
               <button
@@ -22,6 +30,10 @@
             </div>
           </UFormField>
 
+          <UFormField label="Bag Size" name="bagSize">
+            <UInput v-model="form.bagSize" class="w-full" />
+          </UFormField>
+
           <UFormField label="Number of Vouchers" name="quantity">
             <div class="flex flex-wrap gap-2 mb-2">
               <UButton v-for="q in [100, 500, 1000, 5000]" :key="q" size="xs" :variant="form.quantity === q ? 'solid' : 'outline'" color="neutral" @click="form.quantity = q">
@@ -31,15 +43,17 @@
             <UInput v-model.number="form.quantity" type="number" min="1" class="w-full" />
           </UFormField>
 
-          <UFormField label="Serial Prefix" name="serialPrefix">
-            <UInput v-model="form.serialPrefix" class="w-full" />
-          </UFormField>
-
-          <UFormField label="Validity">
-            <UInput :model-value="`${form.validityMonths} months from issue`" disabled class="w-full" />
-          </UFormField>
+          <div class="grid grid-cols-2 gap-4">
+            <UFormField label="Validity (months)" name="validityMonths">
+              <UInput v-model.number="form.validityMonths" type="number" min="1" class="w-full" />
+            </UFormField>
+            <UFormField label="Year" name="year">
+              <UInput v-model.number="form.year" type="number" class="w-full" />
+            </UFormField>
+          </div>
 
           <UAlert color="info" variant="subtle" icon="i-lucide-shield-check" title="Each voucher is single-use — invalid once redeemed." />
+          <UAlert v-if="error" color="error" variant="subtle" :title="error" />
 
           <UButton type="submit" size="lg" icon="i-lucide-cog" :loading="generating">
             Generate &amp; Hash Batch
@@ -50,29 +64,11 @@
       <UCard v-if="lastBatch">
         <template #header>
           <p class="font-semibold text-gray-900 dark:text-white">{{ lastBatch.batchCode }}</p>
-          <p class="text-xs text-gray-500">{{ lastBatch.quantityGenerated.toLocaleString() }} × {{ lastBatch.foodItem }} · 5kg · valid {{ lastBatch.validityMonths }} months</p>
+          <p class="text-xs text-gray-500">{{ lastBatch.quantity.toLocaleString() }} × {{ lastBatch.foodItem }} · {{ lastBatch.bagSize }} · valid {{ lastBatch.validityMonths }} months</p>
         </template>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div v-for="(v, i) in previewVouchers" :key="i" class="border border-gray-200 dark:border-gray-800 rounded-lg p-3 text-sm">
-            <p class="font-semibold text-gray-900 dark:text-white">AKBPA FOOD VOUCHER</p>
-            <p class="text-gray-500">{{ lastBatch.foodItem }} · 5kg</p>
-            <p class="mt-2 text-xs text-gray-400">SERIAL</p>
-            <p class="font-mono text-xs">{{ v }}</p>
-          </div>
-        </div>
-        <p class="text-xs text-gray-400 mt-3">Showing 4 of {{ lastBatch.quantityGenerated.toLocaleString() }} generated vouchers</p>
-        <div class="flex items-center gap-3 mt-4">
-          <UButton
-            icon="i-lucide-printer" color="neutral" variant="outline" :loading="markingSent"
-            :disabled="lastBatch.status !== 'Generated'"
-            @click="onSendToPrinter"
-          >
-            {{ lastBatch.status === 'Generated' ? 'Export QR Images for Printer' : 'Sent to Printer' }}
-          </UButton>
-          <UBadge v-if="lastBatch.status === 'PrintedPending'" color="info" variant="subtle">
-            Awaiting return — receive at Voucher Batches → Receive Batch
-          </UBadge>
-        </div>
+        <UButton :to="`/vouchers/batches/${lastBatch.id}`" icon="i-lucide-arrow-right" variant="outline" color="neutral">
+          View Batch &amp; Vouchers
+        </UButton>
       </UCard>
     </div>
 
@@ -81,13 +77,13 @@
         <p class="font-semibold text-gray-900 dark:text-white">Production History</p>
       </template>
       <div class="space-y-3">
-        <div v-for="b in vouchersStore.batches" :key="b.id" class="border border-gray-200 dark:border-gray-800 rounded-lg p-3">
+        <div v-for="b in batchesStore.batches" :key="b.id" class="border border-gray-200 dark:border-gray-800 rounded-lg p-3">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ b.batchCode }}</p>
-              <p class="text-xs text-gray-500">{{ b.foodItem }} · {{ b.quantityGenerated.toLocaleString() }}</p>
+              <p class="text-xs text-gray-500">{{ b.foodItem }} · {{ b.quantity.toLocaleString() }}</p>
             </div>
-            <UBadge :color="b.status === 'Allocated' ? 'success' : 'warning'" variant="subtle">{{ b.status }}</UBadge>
+            <UBadge :color="statusColor(b.status)" variant="subtle">{{ b.status }}</UBadge>
           </div>
         </div>
       </div>
@@ -100,9 +96,13 @@ definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Ad
 
 import type { FoodItem, VoucherBatch } from '~/types'
 
-const auth = useAuthStore()
-const vouchersStore = useVouchersStore()
-onMounted(() => vouchersStore.fetchBatches())
+const batchesStore = useVoucherBatchesStore()
+const cyclesStore = useProgrammeCyclesStore()
+onMounted(async () => {
+  await Promise.all([batchesStore.fetchBatches(), cyclesStore.fetchCycles()])
+})
+
+const cycleOptions = computed(() => cyclesStore.cycles.map(c => ({ label: c.name, value: c.id })))
 
 const items: { value: FoodItem; emoji: string }[] = [
   { value: 'Rice', emoji: '🍚' },
@@ -111,41 +111,44 @@ const items: { value: FoodItem; emoji: string }[] = [
 ]
 
 const form = reactive({
+  programmeCycleId: '',
+  batchCode: '',
   foodItem: 'Rice' as FoodItem,
+  bagSize: '5kg',
   quantity: 500,
-  serialPrefix: 'AKBPA-RICE-2026-',
   validityMonths: 3,
+  year: new Date().getFullYear(),
 })
+watch(cycleOptions, (list) => { if (!form.programmeCycleId && list[0]) form.programmeCycleId = list[0].value }, { immediate: true })
 
 const generating = ref(false)
-const markingSent = ref(false)
+const error = ref('')
 const lastBatch = ref<VoucherBatch | null>(null)
-const previewVouchers = ref<string[]>([])
 
 async function onGenerate() {
+  error.value = ''
   generating.value = true
   try {
-    const batch = await vouchersStore.generateBatch({
+    lastBatch.value = await batchesStore.createBatch({
+      batchCode: form.batchCode,
+      programmeCycleId: form.programmeCycleId,
       foodItem: form.foodItem,
+      bagSize: form.bagSize,
       quantity: form.quantity,
-      serialPrefix: form.serialPrefix,
       validityMonths: form.validityMonths,
-    }, auth.user?.id ?? 'unknown')
-    lastBatch.value = batch
-    previewVouchers.value = Array.from({ length: 4 }, (_, i) =>
-      `${form.serialPrefix}${String(i + 1).padStart(6, '0')}`)
+      year: form.year,
+    })
+  } catch (e: any) {
+    error.value = e.response?.data?.message ?? e.message
   } finally {
     generating.value = false
   }
 }
 
-async function onSendToPrinter() {
-  if (!lastBatch.value) return
-  markingSent.value = true
-  try {
-    lastBatch.value = await vouchersStore.markSentToPrinter(lastBatch.value.id)
-  } finally {
-    markingSent.value = false
-  }
+function statusColor(status: string) {
+  if (status === 'Allocated' || status === 'Closed') return 'success'
+  if (status === 'PartlyAllocated') return 'warning'
+  if (status === 'Cancelled') return 'error'
+  return 'neutral'
 }
 </script>

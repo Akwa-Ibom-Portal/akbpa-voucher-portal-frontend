@@ -1,26 +1,31 @@
-import type { AuditLogEntry } from '~/types'
-import { mockAuditLogs } from '~/data/mock'
-import { mockDelay } from '~/composables/useHttp'
+import type { AuditLogEntry, PagedResult } from '~/types'
 
-export interface AuditListParams {
-  search?: string
-  module?: string
-}
-
-export async function listAuditLogs(params: AuditListParams = {}): Promise<AuditLogEntry[]> {
-  const { http, useMock } = useHttp()
-  if (!useMock) {
-    const { data } = await http.get('/audit-logs', { params })
-    return data
+function normalizeAuditLog(raw: any): AuditLogEntry {
+  return {
+    id: String(raw.id),
+    actorUserId: String(raw.actorUserId ?? raw.actor_user_id),
+    actorName: raw.actorName ?? raw.actor_name ?? '',
+    actorEmail: raw.actorEmail ?? raw.actor_email,
+    action: raw.action,
+    entityType: raw.entityType ?? raw.entity_type,
+    entityId: raw.entityId !== undefined ? String(raw.entityId) : (raw.entity_id !== undefined && raw.entity_id !== null ? String(raw.entity_id) : undefined),
+    details: raw.details ?? undefined,
+    createdAt: raw.createdAt ?? raw.created_at,
   }
-  await mockDelay()
-  return mockAuditLogs.filter((l) => {
-    const matchesSearch = !params.search || `${l.action} ${l.userName} ${l.recordId}`.toLowerCase().includes(params.search.toLowerCase())
-    const matchesModule = !params.module || params.module === 'All Modules' || l.module === params.module
-    return matchesSearch && matchesModule
-  })
 }
 
-export function recordAuditLog(entry: Omit<AuditLogEntry, 'id' | 'createdAt'>) {
-  mockAuditLogs.unshift({ ...entry, id: `a-${Date.now()}`, createdAt: new Date().toISOString() })
+export interface AuditLogParams {
+  page?: number
+  limit?: number
+}
+
+export async function listAuditLogs(params: AuditLogParams = {}): Promise<PagedResult<AuditLogEntry>> {
+  const { http } = useHttp()
+  const { data } = await http.get('/audit-logs', { params: { page: params.page, limit: params.limit ?? 50 } })
+  const body = data.data ?? data
+  const list = body.auditLogs ?? body
+  return {
+    items: list.map(normalizeAuditLog),
+    pagination: body.pagination ?? { page: 1, limit: list.length, total: list.length, pages: 1 },
+  }
 }

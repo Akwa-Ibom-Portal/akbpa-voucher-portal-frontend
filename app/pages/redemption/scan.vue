@@ -2,23 +2,42 @@
   <div class="max-w-md mx-auto px-4 py-6 space-y-6">
     <div>
       <p class="text-xs text-white/60 uppercase">Distribution Point</p>
-      <p class="font-semibold">{{ location }}</p>
+      <p class="font-semibold">Redemption Desk</p>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-white/5 rounded-xl p-4 text-center">
-        <p class="text-2xl font-bold">{{ redeemedToday.length }}</p>
-        <p class="text-xs text-white/60">redeemed today</p>
-      </div>
-      <div class="bg-white/5 rounded-xl p-4 text-center">
-        <p class="text-2xl font-bold">{{ redeemedToday.length }}</p>
-        <p class="text-xs text-white/60">5kg bags released</p>
+        <p class="text-2xl font-bold">{{ redemptionsStore.redemptions.length }}</p>
+        <p class="text-xs text-white/60">redeemed this session</p>
       </div>
     </div>
 
     <!-- Scan view -->
     <div v-if="!scanResult">
-      <div class="rounded-2xl overflow-hidden bg-black aspect-square relative ring-1 ring-white/10">
+      <UFormField label="Ward" class="text-white/80">
+        <USelect v-model="wardId" :items="wardOptions" placeholder="Select the ward" class="w-full" @update:model-value="onWardChange" />
+      </UFormField>
+
+      <UFormField label="Beneficiary presenting the voucher" class="text-white/80 mt-3">
+        <UInput v-model="beneficiarySearch" :disabled="!wardId" placeholder="Search by name or ID" icon="i-lucide-search" class="w-full" />
+      </UFormField>
+      <div v-if="beneficiarySearch && !selectedBeneficiary" class="border border-white/10 rounded-lg divide-y divide-white/10 max-h-40 overflow-y-auto mt-2">
+        <button
+          v-for="b in beneficiaryMatches" :key="b.id" type="button"
+          class="w-full text-left px-3 py-2 text-sm hover:bg-white/5"
+          @click="selectedBeneficiary = b"
+        >{{ b.fullName }} <span class="text-white/40">· {{ b.beneficiaryCode }}</span></button>
+      </div>
+      <div v-if="selectedBeneficiary" class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 mt-2 text-sm">
+        <span>{{ selectedBeneficiary.fullName }} · {{ selectedBeneficiary.beneficiaryCode }}</span>
+        <UButton size="xs" color="neutral" variant="ghost" @click="selectedBeneficiary = null">Change</UButton>
+      </div>
+
+      <UFormField label="Food item being redeemed" class="text-white/80 mt-3">
+        <USelect v-model="foodItem" :items="['Rice', 'Beans', 'Garri']" class="w-full" />
+      </UFormField>
+
+      <div class="rounded-2xl overflow-hidden bg-black aspect-square relative ring-1 ring-white/10 mt-3">
         <ClientOnly>
           <QrcodeStream v-if="cameraOn" @detect="onDetect" @error="onCameraError" />
         </ClientOnly>
@@ -28,18 +47,14 @@
         </div>
       </div>
 
-      <UButton block size="lg" class="mt-4" icon="i-lucide-camera" @click="cameraOn = !cameraOn">
+      <UButton block size="lg" class="mt-4" icon="i-lucide-camera" :disabled="!canScan" @click="cameraOn = !cameraOn">
         {{ cameraOn ? 'Stop Camera' : 'Start Camera' }}
       </UButton>
 
       <div class="flex gap-2 mt-3">
-        <UInput v-model="manualToken" placeholder="Or type/paste a voucher token" class="w-full" />
-        <UButton :loading="validating" @click="validate(manualToken)">Validate</UButton>
+        <UInput v-model="manualToken" :disabled="!canScan" placeholder="Or type/paste a voucher QR token" class="w-full" />
+        <UButton :loading="validating" :disabled="!canScan" @click="validate(manualToken)">Validate</UButton>
       </div>
-
-      <UButton block color="neutral" variant="outline" class="mt-3" icon="i-lucide-truck" to="/field/redeem">
-        Direct issue &amp; redeem (no voucher in hand)
-      </UButton>
     </div>
 
     <!-- Result view -->
@@ -50,13 +65,13 @@
       </div>
       <p class="text-sm text-white/80">{{ scanResult.message }}</p>
 
-      <div v-if="scanResult.valid" class="mt-4 space-y-2 text-sm">
+      <div v-if="scanResult.valid && scanResult.voucher" class="mt-4 space-y-2 text-sm">
         <div class="flex justify-between"><span class="text-white/50">Serial</span><span class="font-mono">{{ scanResult.voucher.serialNumber }}</span></div>
-        <div class="flex justify-between"><span class="text-white/50">Item</span><span>{{ scanResult.voucher.foodItem }} · 5kg</span></div>
+        <div class="flex justify-between"><span class="text-white/50">Item</span><span>{{ scanResult.voucher.foodItem }} · {{ scanResult.voucher.bagSize }}</span></div>
         <div class="flex justify-between"><span class="text-white/50">Status</span><span>{{ scanResult.voucher.status }}</span></div>
       </div>
 
-      <UButton v-if="scanResult.valid" block size="lg" class="mt-5" icon="i-lucide-package-check" @click="confirmRedemption">
+      <UButton v-if="scanResult.valid" block size="lg" class="mt-5" :loading="redeeming" icon="i-lucide-package-check" @click="confirmRedemption">
         Confirm Redemption · Release Bag
       </UButton>
       <UButton block size="lg" class="mt-3" color="neutral" variant="outline" @click="resetScan">
@@ -64,11 +79,11 @@
       </UButton>
     </div>
 
-    <div v-if="!scanResult">
+    <div v-if="!scanResult && redemptionsStore.redemptions.length">
       <p class="text-xs text-white/50 uppercase mb-2 mt-6">Recent Redemptions</p>
       <div class="space-y-2">
-        <div v-for="r in recentRedemptions" :key="r.id" class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 text-sm">
-          <span>{{ r.serialNumber }}</span>
+        <div v-for="r in redemptionsStore.redemptions.slice(0, 5)" :key="r.id" class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 text-sm">
+          <span>{{ r.serialNumber }} · {{ r.foodItem }}</span>
           <UBadge color="success" variant="subtle">Redeemed</UBadge>
         </div>
       </div>
@@ -80,29 +95,44 @@
 definePageMeta({ layout: 'scanner', middleware: ['auth', 'role'], role: ['Redemption Officer'] })
 
 import { QrcodeStream } from 'vue-qrcode-reader'
-import type { Voucher } from '~/types'
+import type { Beneficiary, FoodItem } from '~/types'
+import type { ValidateScanResult } from '~/services/voucherRedemptionsApi'
 
-const auth = useAuthStore()
-const vouchersStore = useVouchersStore()
-const auditStore = useAuditLogsStore()
+const lgaStore = useLgaStore()
+const beneficiariesStore = useBeneficiariesStore()
+const redemptionsStore = useVoucherRedemptionsStore()
 
-const location = 'Ikot Ekpene · Town Hall'
+onMounted(async () => {
+  await lgaStore.ensureLoaded()
+  await redemptionsStore.fetchRedemptions()
+})
+
+const wardOptions = computed(() => lgaStore.wards.map(w => ({ label: `${w.name} · ${lgaStore.lgaName(w.lgaId)}`, value: w.id })))
+const wardId = ref('')
+const beneficiarySearch = ref('')
+const selectedBeneficiary = ref<Beneficiary | null>(null)
+
+function onWardChange() {
+  selectedBeneficiary.value = null
+  beneficiarySearch.value = ''
+}
+
+watch(beneficiarySearch, async (value) => {
+  if (!wardId.value || !value) return
+  await beneficiariesStore.fetchBeneficiaries({ wardId: wardId.value, search: value })
+})
+const beneficiaryMatches = computed(() => beneficiariesStore.beneficiaries.slice(0, 8))
+
+const canScan = computed(() => !!wardId.value && !!selectedBeneficiary.value)
+
 const cameraOn = ref(false)
 const manualToken = ref('')
 const validating = ref(false)
+const redeeming = ref(false)
+const foodItem = ref<FoodItem>('Rice')
 
-const recentRedemptions = computed(() => auditStore.logs
-  .filter(l => l.action === 'VOUCHER_REDEEMED')
-  .slice(0, 3)
-  .map(l => ({ id: l.id, serialNumber: l.recordId ?? '' })))
-const redeemedToday = recentRedemptions
-
-onMounted(() => {
-  auditStore.moduleFilter = 'redemption'
-  auditStore.fetchLogs()
-})
-
-const scanResult = ref<{ valid: boolean; message: string; voucher?: Voucher } | null>(null)
+const scanResult = ref<ValidateScanResult | null>(null)
+const lastToken = ref('')
 
 function onCameraError() {
   cameraOn.value = false
@@ -113,25 +143,42 @@ function onDetect(detected: { rawValue: string }[]) {
   if (raw) validate(raw)
 }
 
-async function validate(tokenOrSerial: string) {
+async function validate(token: string) {
+  if (!token || !canScan.value || !selectedBeneficiary.value) return
   cameraOn.value = false
   validating.value = true
+  lastToken.value = token
   try {
-    scanResult.value = await vouchersStore.validateScan(tokenOrSerial)
+    scanResult.value = await redemptionsStore.validateScan({
+      qrToken: token,
+      foodItem: foodItem.value,
+      beneficiaryId: selectedBeneficiary.value.id,
+      wardId: wardId.value,
+    })
   } finally {
     validating.value = false
   }
 }
 
 async function confirmRedemption() {
-  if (!scanResult.value?.voucher) return
-  await vouchersStore.redeemVoucher(scanResult.value.voucher.id, auth.user?.id ?? 'unknown')
-  await auditStore.fetchLogs()
-  resetScan()
+  if (!scanResult.value?.valid || !selectedBeneficiary.value) return
+  redeeming.value = true
+  try {
+    await redemptionsStore.redeemScan({
+      qrToken: lastToken.value,
+      foodItem: foodItem.value,
+      beneficiaryId: selectedBeneficiary.value.id,
+      wardId: wardId.value,
+    })
+    resetScan()
+  } finally {
+    redeeming.value = false
+  }
 }
 
 function resetScan() {
   scanResult.value = null
   manualToken.value = ''
+  lastToken.value = ''
 }
 </script>

@@ -9,7 +9,7 @@
     </div>
 
     <UCard>
-      <UTable :data="paginated" :columns="columns" :loading="vouchersStore.loading">
+      <UTable :data="paginated" :columns="columns" :loading="batchesStore.loading">
         <template #batchCode-cell="{ row }">
           <NuxtLink :to="`/vouchers/batches/${row.original.id}`" class="font-medium text-akbpaGreen-700 hover:underline">
             {{ row.original.batchCode }}
@@ -29,25 +29,24 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin', 'Voucher Receiving Officer', 'LGA Voucher Officer'] })
 
-const vouchersStore = useVouchersStore()
-onMounted(() => vouchersStore.fetchBatches())
+const batchesStore = useVoucherBatchesStore()
+onMounted(() => batchesStore.fetchBatches())
 
-const { page, total, pageSize, paginated } = usePagination(() => vouchersStore.batches, 10)
+const { page, total, pageSize, paginated } = usePagination(() => batchesStore.batches, 10)
 
 const columns = [
   { accessorKey: 'batchCode', header: 'Batch' },
   { accessorKey: 'foodItem', header: 'Item' },
-  { accessorKey: 'quantityGenerated', header: 'Generated' },
-  { accessorKey: 'quantityReceived', header: 'Received' },
-  { accessorKey: 'quantityIssued', header: 'Issued' },
-  { accessorKey: 'quantityRedeemed', header: 'Redeemed' },
+  { accessorKey: 'bagSize', header: 'Bag Size' },
+  { accessorKey: 'quantity', header: 'Quantity' },
+  { accessorKey: 'programmeCycleName', header: 'Programme Cycle' },
   { accessorKey: 'status', header: 'Status' },
 ]
 
 function statusColor(status: string) {
-  if (status === 'Allocated' || status === 'Received') return 'success'
-  if (status === 'PartiallyReceived' || status === 'PrintedPending') return 'warning'
-  if (status === 'Discrepancy') return 'error'
+  if (status === 'Allocated' || status === 'Closed') return 'success'
+  if (status === 'PartlyAllocated') return 'warning'
+  if (status === 'Cancelled') return 'error'
   return 'neutral'
 }
 </script>

@@ -3,10 +3,10 @@
     <div class="flex items-center justify-between flex-wrap gap-3">
       <div>
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">Social Register</h1>
-        <p class="text-sm text-gray-500">{{ store.beneficiaries.length.toLocaleString() }} beneficiaries matching current filters</p>
+        <p class="text-sm text-gray-500">{{ store.pagination.total.toLocaleString() }} beneficiaries matching current filters</p>
       </div>
       <div class="flex gap-2">
-        <UButton to="/beneficiaries/upload" icon="i-lucide-upload" color="neutral" variant="outline">Upload Excel</UButton>
+        <UButton to="/beneficiaries/upload" icon="i-lucide-upload" color="neutral" variant="outline">Upload CSV</UButton>
         <UButton to="/beneficiaries/add" icon="i-lucide-plus">Add Beneficiary</UButton>
       </div>
     </div>
@@ -19,25 +19,28 @@
         <UButton color="neutral" variant="outline" icon="i-lucide-rotate-ccw" @click="resetFilters">Reset Filters</UButton>
       </div>
 
-      <UTable :data="paginated" :columns="columns" :loading="store.loading">
+      <UAlert v-if="store.error" color="error" variant="subtle" :title="store.error" class="mb-4" />
+
+      <UTable :data="store.beneficiaries" :columns="columns" :loading="store.loading">
         <template #beneficiary-cell="{ row }">
-          <div>
-            <p class="font-medium text-gray-900 dark:text-white">{{ row.original.firstName }} {{ row.original.surname }}</p>
-            <p class="text-xs text-gray-500">{{ row.original.beneficiaryCode }} · NIN {{ row.original.nin }}</p>
-          </div>
+          <NuxtLink :to="`/beneficiaries/${row.original.id}`" class="font-medium text-akbpaGreen-700 hover:underline">
+            {{ row.original.fullName }}
+          </NuxtLink>
+          <p class="text-xs text-gray-500">{{ row.original.beneficiaryCode }}</p>
         </template>
         <template #lgaWard-cell="{ row }">
-          <p class="text-sm">{{ lgaStore.lgaName(row.original.lgaId) }}</p>
-          <p class="text-xs text-gray-500">{{ lgaStore.wardName(row.original.wardId) }}</p>
+          <p class="text-sm">{{ row.original.lgaName ?? lgaStore.lgaName(row.original.lgaId) }}</p>
+          <p class="text-xs text-gray-500">{{ row.original.wardName ?? lgaStore.wardName(row.original.wardId) }}</p>
         </template>
-        <template v-for="item in ['Rice', 'Beans', 'Garri']" :key="item" #[`${item}-cell`]="{ row }">
-          <UBadge :color="statusColor(row.original.voucherStatus[item])" variant="subtle">
-            {{ row.original.voucherStatus[item] }}
-          </UBadge>
+        <template #status-cell="{ row }">
+          <UBadge :color="row.original.status === 'Active' ? 'success' : 'neutral'" variant="subtle">{{ row.original.status }}</UBadge>
         </template>
       </UTable>
-      <div v-if="total > pageSize" class="flex justify-end mt-4">
-        <UPagination v-model:page="page" :total="total" :items-per-page="pageSize" />
+      <div v-if="store.pagination.pages > 1" class="flex justify-end mt-4">
+        <UPagination
+          :page="store.page" :total="store.pagination.total" :items-per-page="store.pageSize"
+          @update:page="onPageChange"
+        />
       </div>
     </UCard>
   </div>
@@ -61,16 +64,18 @@ onMounted(async () => {
   if (auth.role === 'Ward PA / Issuing Officer' && auth.user?.wardIds?.[0]) {
     store.wardFilter = auth.user.wardIds[0]
   }
-  await store.fetchBeneficiaries()
+  await store.fetchBeneficiaries({ page: 1 })
 })
 
 function onSearch() {
   const lga = lgaStore.lgas.find(l => l.name === lgaFilterName.value)
   store.lgaFilter = lga?.id ?? ''
-  store.fetchBeneficiaries()
+  store.fetchBeneficiaries({ page: 1 })
 }
 
-const { page, total, pageSize, paginated } = usePagination(() => store.beneficiaries, 10)
+function onPageChange(page: number) {
+  store.fetchBeneficiaries({ page })
+}
 
 function resetFilters() {
   store.search = ''
@@ -78,19 +83,14 @@ function resetFilters() {
   // Ward PA stays hard-scoped to their own ward — only the LGA picker resets for them.
   lgaFilterName.value = 'All LGAs'
   store.lgaFilter = ''
-  store.fetchBeneficiaries()
+  store.fetchBeneficiaries({ page: 1 })
 }
 
 const columns = [
   { accessorKey: 'beneficiary', header: 'Beneficiary' },
   { accessorKey: 'gender', header: 'Gender' },
   { accessorKey: 'lgaWard', header: 'LGA / Ward' },
-  { accessorKey: 'Rice', header: 'Rice' },
-  { accessorKey: 'Beans', header: 'Beans' },
-  { accessorKey: 'Garri', header: 'Garri' },
+  { accessorKey: 'householdSize', header: 'Household Size' },
+  { accessorKey: 'status', header: 'Status' },
 ]
-
-function statusColor(status: string) {
-  return status === 'Redeemed' ? 'success' : status === 'Issued' ? 'info' : 'neutral'
-}
 </script>

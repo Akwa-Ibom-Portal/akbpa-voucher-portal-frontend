@@ -1,35 +1,48 @@
 import { defineStore } from 'pinia'
-import type { FoodItem, ReportSummary } from '~/types'
+import type { ReportGroupRow, ReportSummary, StatusCounts } from '~/types'
 import * as reportsApi from '~/services/reportsApi'
 
 export const useReportsStore = defineStore('reports', () => {
-  const summary = ref<ReportSummary>({ generated: 0, allocated: 0, issued: 0, redeemed: 0, expired: 0, pendingRedemption: 0 })
-  const byItem = ref<Awaited<ReturnType<typeof reportsApi.getByItem>>>([])
-  const byLga = ref<Awaited<ReturnType<typeof reportsApi.getByLga>>>([])
-  const byGender = ref<Awaited<ReturnType<typeof reportsApi.getByGender>>>({ female: { count: 0, redeemed: 0 }, male: { count: 0, redeemed: 0 } })
+  const summary = ref<ReportSummary>({ statusCounts: {}, totalBatches: 0, totalBeneficiaries: 0, duplicateScanAttempts: 0, issuedButUnredeemed: 0, expired: 0 })
+  const byItem = ref<ReportGroupRow[]>([])
+  const byLga = ref<ReportGroupRow[]>([])
+  const byWard = ref<ReportGroupRow[]>([])
+  const byGender = ref<ReportGroupRow[]>([])
+  const inventory = ref<StatusCounts>({})
   const loading = ref(false)
 
-  const lgaFilter = ref('')
-  const itemFilter = ref<FoodItem | ''>('')
+  /** The real reports endpoints only accept a programmeCycleId filter — no LGA/item/status/
+   *  gender/date-range filters exist server-side despite the Developer Guide §8 listing them. */
+  const programmeCycleId = ref('')
 
   async function fetchAll() {
     loading.value = true
     try {
-      const filters = { lgaId: lgaFilter.value || undefined, foodItem: itemFilter.value || undefined }
-      const [s, item, lga, gender] = await Promise.all([
+      const filters = { programmeCycleId: programmeCycleId.value || undefined }
+      const [s, item, lga, ward, gender] = await Promise.all([
         reportsApi.getSummary(filters),
-        reportsApi.getByItem(),
-        reportsApi.getByLga(),
-        reportsApi.getByGender(),
+        reportsApi.getByItem(filters),
+        reportsApi.getByLga(filters),
+        reportsApi.getByWard(filters),
+        reportsApi.getByGender(filters),
       ])
       summary.value = s
       byItem.value = item
       byLga.value = lga
+      byWard.value = ward
       byGender.value = gender
     } finally {
       loading.value = false
     }
   }
 
-  return { summary, byItem, byLga, byGender, loading, lgaFilter, itemFilter, fetchAll }
+  async function fetchInventory(voucherBatchId?: string) {
+    inventory.value = await reportsApi.getInventory(voucherBatchId)
+  }
+
+  async function exportReport(type: reportsApi.ExportType, format: reportsApi.ExportFormat) {
+    return reportsApi.exportReport(type, format, { programmeCycleId: programmeCycleId.value || undefined })
+  }
+
+  return { summary, byItem, byLga, byWard, byGender, inventory, loading, programmeCycleId, fetchAll, fetchInventory, exportReport }
 })

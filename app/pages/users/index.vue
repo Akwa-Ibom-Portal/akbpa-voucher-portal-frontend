@@ -17,27 +17,6 @@
       </UCard>
     </div>
 
-    <UCard v-if="store.pendingUsers.length" class="border-amber-200 dark:border-amber-900">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-clock" class="size-4 text-amber-600" />
-          <p class="font-semibold text-gray-900 dark:text-white text-sm">Self-Requested — Pending Approval ({{ store.pendingUsers.length }})</p>
-        </div>
-      </template>
-      <div class="space-y-3">
-        <div v-for="u in store.pendingUsers" :key="u.id" class="flex items-center justify-between flex-wrap gap-3 border border-gray-200 dark:border-gray-800 rounded-lg p-3">
-          <div>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ u.fullName }} <span class="text-gray-400 font-normal">· requested {{ u.role }}</span></p>
-            <p class="text-xs text-gray-500">{{ u.email }} · {{ u.phone }} · NIN {{ u.nin }}</p>
-          </div>
-          <div class="flex gap-2">
-            <UButton size="sm" color="success" icon="i-lucide-check" :loading="actingOn === u.id" @click="approve(u)">Approve</UButton>
-            <UButton size="sm" color="error" variant="outline" icon="i-lucide-x" :loading="actingOn === u.id" @click="reject(u)">Reject</UButton>
-          </div>
-        </div>
-      </div>
-    </UCard>
-
     <UCard>
       <div class="flex flex-wrap items-end gap-3 mb-4">
         <UInput v-model="store.search" icon="i-lucide-search" placeholder="Search name or email..." class="flex-1 min-w-48" @keyup.enter="store.fetchUsers()" />
@@ -49,50 +28,72 @@
         <template #status-cell="{ row }">
           <UBadge :color="statusColor(row.original.status)" variant="subtle">{{ row.original.status }}</UBadge>
         </template>
+        <template #actions-cell="{ row }">
+          <UDropdownMenu :items="rowActions(row.original)">
+            <UButton color="neutral" variant="ghost" icon="i-lucide-ellipsis-vertical" :loading="actingOn === row.original.id" />
+          </UDropdownMenu>
+        </template>
       </UTable>
       <div v-if="total > pageSize" class="flex justify-end mt-4">
         <UPagination v-model:page="page" :total="total" :items-per-page="pageSize" />
       </div>
     </UCard>
 
-    <!-- Add User modal -->
-    <UModal v-model:open="addUserModalOpen" title="Add a New User">
+    <!-- Add / Edit User modal -->
+    <UModal v-model:open="userModalOpen" :title="editingUser ? 'Edit User' : 'Add a New User'">
       <template #body>
-        <UForm :state="addUserForm" class="space-y-4" @submit="onAddUser">
+        <UForm :state="userForm" class="space-y-4" @submit="onSaveUser">
           <UFormField label="Full Name" name="fullName" required>
-            <UInput v-model="addUserForm.fullName" class="w-full" />
+            <UInput v-model="userForm.fullName" class="w-full" />
           </UFormField>
           <UFormField label="Email address" name="email" required>
-            <UInput v-model="addUserForm.email" type="email" icon="i-lucide-mail" class="w-full" />
+            <UInput v-model="userForm.email" type="email" icon="i-lucide-mail" class="w-full" :disabled="!!editingUser" />
+            <template v-if="editingUser" #help>Email can't be changed here.</template>
           </UFormField>
-          <UFormField label="Password" name="password" required>
+          <UFormField v-if="!editingUser" label="Password" name="password" required>
             <div class="flex gap-2">
-              <PasswordInput v-model="addUserForm.password" />
+              <PasswordInput v-model="userForm.password" />
               <UButton color="neutral" variant="outline" icon="i-lucide-sparkles" @click="suggestPassword">Suggest</UButton>
             </div>
             <template #help>Share this password with the user directly — there's no invite email yet.</template>
           </UFormField>
+          <UFormField v-if="editingUser" label="Phone" name="phone">
+            <UInput v-model="userForm.phone" class="w-full" />
+          </UFormField>
           <UFormField label="Role &amp; Permissions" name="roleId" required>
-            <USelect v-model="addUserForm.roleId" :items="roleOptions" class="w-full" />
-            <template #help>{{ rolesStore.roles.find(r => r.id === addUserForm.roleId)?.description }}</template>
+            <USelect v-model="userForm.roleId" :items="roleOptions" class="w-full" />
+            <template #help>{{ rolesStore.roles.find(r => r.id === userForm.roleId)?.description }}</template>
           </UFormField>
 
           <div v-if="needsLga" class="grid sm:grid-cols-2 gap-4">
             <UFormField label="LGA" name="lgaId" required>
-              <USelect v-model="addUserForm.lgaId" :items="lgaOptions" class="w-full" @change="addUserForm.wardId = ''" />
+              <USelect v-model="userForm.lgaId" :items="lgaOptions" class="w-full" @change="userForm.wardId = ''" />
             </UFormField>
             <UFormField v-if="needsWard" label="Ward" name="wardId" required>
-              <USelect v-model="addUserForm.wardId" :items="wardOptions" :disabled="!addUserForm.lgaId" class="w-full" />
+              <USelect v-model="userForm.wardId" :items="wardOptions" :disabled="!userForm.lgaId" class="w-full" />
             </UFormField>
           </div>
 
-          <UAlert v-if="addUserError" color="error" variant="subtle" :title="addUserError" />
+          <UAlert v-if="userFormError" color="error" variant="subtle" :title="userFormError" />
 
           <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" @click="addUserModalOpen = false">Close</UButton>
-            <UButton type="submit" :loading="addingUser">Create User</UButton>
+            <UButton color="neutral" variant="ghost" @click="userModalOpen = false">Close</UButton>
+            <UButton type="submit" :loading="savingUser">{{ editingUser ? 'Save Changes' : 'Create User' }}</UButton>
           </div>
         </UForm>
+      </template>
+    </UModal>
+
+    <!-- Delete confirmation -->
+    <UModal v-model:open="deleteModalOpen" title="Remove user?">
+      <template #body>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          This deactivates <strong>{{ userPendingDelete?.fullName }}</strong>'s account. They will no longer be able to sign in.
+        </p>
+        <div class="flex justify-end gap-2 mt-6">
+          <UButton color="neutral" variant="ghost" @click="deleteModalOpen = false">Cancel</UButton>
+          <UButton color="error" :loading="actingOn === userPendingDelete?.id" @click="confirmDelete">Remove User</UButton>
+        </div>
       </template>
     </UModal>
   </div>
@@ -102,10 +103,12 @@
 definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin'] })
 
 import { USER_ROLES, type User, type UserRole } from '~/types'
-import { listLgasFromApi, listWardsFromApi } from '~/services/lgaApi'
+import { listLgas, listWards } from '~/services/lgaApi'
+import * as usersApi from '~/services/usersApi'
 
 const store = useUsersStore()
 const rolesStore = useRolesStore()
+const toast = useToast()
 
 onMounted(async () => {
   await rolesStore.ensureLoaded()
@@ -142,92 +145,192 @@ const columns = [
   { accessorKey: 'role', header: 'Role' },
   { accessorKey: 'createdAt', header: 'Created', cell: ({ row }: any) => row.getValue('createdAt') ? new Date(row.getValue('createdAt')).toLocaleString() : '—' },
   { accessorKey: 'status', header: 'Status' },
+  { id: 'actions', header: '' },
 ]
 
 function statusColor(status: User['status']) {
-  if (status === 'Active') return 'success'
-  if (status === 'PendingApproval') return 'warning'
-  if (status === 'Rejected') return 'error'
-  return 'neutral'
+  return status === 'Active' ? 'success' : 'neutral'
 }
 
-async function approve(u: User) {
+function rowActions(u: User) {
+  return [
+    [
+      { label: 'Edit', icon: 'i-lucide-pencil', onSelect: () => openEditUser(u) },
+      {
+        label: u.isActive ? 'Suspend' : 'Activate',
+        icon: u.isActive ? 'i-lucide-ban' : 'i-lucide-check-circle',
+        onSelect: () => toggleStatus(u),
+      },
+      { label: 'Reset Password', icon: 'i-lucide-key-round', onSelect: () => resetPassword(u) },
+    ],
+    [
+      { label: 'Remove User', icon: 'i-lucide-trash-2', color: 'error' as const, onSelect: () => openDeleteUser(u) },
+    ],
+  ]
+}
+
+async function toggleStatus(u: User) {
   actingOn.value = u.id
-  try { await store.approve(u.id) } finally { actingOn.value = '' }
+  try {
+    await store.setUserStatus(u.id, !u.isActive)
+    toast.add({ title: u.isActive ? 'User suspended' : 'User activated', color: 'success' })
+  } finally {
+    actingOn.value = ''
+  }
 }
-async function reject(u: User) {
+
+async function resetPassword(u: User) {
   actingOn.value = u.id
-  try { await store.reject(u.id) } finally { actingOn.value = '' }
+  try {
+    await store.resetUserPassword(u.id)
+    toast.add({ title: 'Password reset email sent', color: 'success' })
+  } catch {
+    // The global axios interceptor already toasts the failure (e.g. email provider not configured).
+  } finally {
+    actingOn.value = ''
+  }
 }
 
-// Add User
-const addUserModalOpen = ref(false)
-const addingUser = ref(false)
-const addUserError = ref('')
-const addUserForm = reactive({ fullName: '', email: '', password: '', roleId: '', lgaId: '', wardId: '' })
+const deleteModalOpen = ref(false)
+const userPendingDelete = ref<User | null>(null)
 
-const addUserLgas = ref<{ id: string; name: string }[]>([])
-const addUserWards = ref<{ id: string; name: string; lgaId: string }[]>([])
+function openDeleteUser(u: User) {
+  userPendingDelete.value = u
+  deleteModalOpen.value = true
+}
+
+async function confirmDelete() {
+  if (!userPendingDelete.value) return
+  actingOn.value = userPendingDelete.value.id
+  try {
+    await store.deleteUser(userPendingDelete.value.id)
+    toast.add({ title: 'User removed', color: 'success' })
+    deleteModalOpen.value = false
+  } finally {
+    actingOn.value = ''
+  }
+}
+
+// Add / Edit User
+const userModalOpen = ref(false)
+const savingUser = ref(false)
+const userFormError = ref('')
+const editingUser = ref<User | null>(null)
+const userForm = reactive({ fullName: '', email: '', password: '', phone: '', roleId: '', lgaId: '', wardId: '' })
+
+const userFormLgas = ref<{ id: string; name: string }[]>([])
+const userFormWards = ref<{ id: string; name: string; lgaId: string }[]>([])
+
+function resetUserForm() {
+  userForm.fullName = ''
+  userForm.email = ''
+  userForm.password = ''
+  userForm.phone = ''
+  userForm.roleId = ''
+  userForm.lgaId = ''
+  userForm.wardId = ''
+}
 
 async function openAddUser() {
-  addUserModalOpen.value = true
-  addUserForm.password = generateStrongPassword()
-  if (!addUserLgas.value.length) addUserLgas.value = await listLgasFromApi()
+  editingUser.value = null
+  resetUserForm()
+  userForm.password = generateStrongPassword()
+  userModalOpen.value = true
+  if (!userFormLgas.value.length) userFormLgas.value = await listLgas()
+}
+
+async function openEditUser(row: User) {
+  resetUserForm()
+  userModalOpen.value = true
+
+  // GET /users (list) omits roleId and scopes entirely — only the single-user GET
+  // returns them, so the edit form must re-fetch before it can prefill role/LGA/ward.
+  const u = await usersApi.getUser(row.id)
+  editingUser.value = u
+  userForm.fullName = u.fullName
+  userForm.email = u.email
+  userForm.phone = u.phone ?? ''
+  userForm.roleId = u.roleId ?? rolesStore.roles.find(r => r.name === u.role)?.id ?? ''
+
+  if (!userFormLgas.value.length) userFormLgas.value = await listLgas()
+
+  if (u.wardIds?.[0]) {
+    // The user only stores the ward id, not which LGA it belongs to — load all wards once
+    // to find it, then scope the ward dropdown to that LGA like the Add form does.
+    const allWards = await listWards()
+    const ward = allWards.find(w => w.id === u.wardIds![0])
+    if (ward) {
+      userForm.lgaId = ward.lgaId
+      userFormWards.value = allWards.filter(w => w.lgaId === ward.lgaId)
+      userForm.wardId = ward.id
+    }
+  } else if (u.lgaIds?.[0]) {
+    userForm.lgaId = u.lgaIds[0]
+  }
 }
 
 function suggestPassword() {
-  addUserForm.password = generateStrongPassword()
+  userForm.password = generateStrongPassword()
 }
 
-watch(() => addUserForm.lgaId, async (lgaId) => {
-  addUserWards.value = lgaId ? await listWardsFromApi(lgaId) : []
+watch(() => userForm.lgaId, async (lgaId, oldLgaId) => {
+  if (lgaId === oldLgaId) return
+  userFormWards.value = lgaId ? await listWards(lgaId) : []
 })
 
 const roleOptions = computed(() => rolesStore.roles.map(r => ({ label: r.name, value: r.id })))
-const selectedRoleName = computed(() => rolesStore.roles.find(r => r.id === addUserForm.roleId)?.name ?? '')
+const selectedRoleName = computed(() => rolesStore.roles.find(r => r.id === userForm.roleId)?.name ?? '')
 const needsLga = computed(() => /LGA|Ward/.test(selectedRoleName.value))
 const needsWard = computed(() => /Ward/.test(selectedRoleName.value))
-const lgaOptions = computed(() => addUserLgas.value.map(l => ({ label: l.name, value: l.id })))
-const wardOptions = computed(() => addUserWards.value.map(w => ({ label: w.name, value: w.id })))
+const lgaOptions = computed(() => userFormLgas.value.map(l => ({ label: l.name, value: l.id })))
+const wardOptions = computed(() => userFormWards.value.map(w => ({ label: w.name, value: w.id })))
 
-async function onAddUser() {
-  addUserError.value = ''
-  if (!addUserForm.fullName || !addUserForm.email || !addUserForm.password || !addUserForm.roleId) {
-    addUserError.value = 'Please complete all required fields.'
+async function onSaveUser() {
+  userFormError.value = ''
+  if (!userForm.fullName || !userForm.email || !userForm.roleId || (!editingUser.value && !userForm.password)) {
+    userFormError.value = 'Please complete all required fields.'
     return
   }
-  if (needsLga.value && !addUserForm.lgaId) {
-    addUserError.value = 'Please select an LGA.'
+  if (needsLga.value && !userForm.lgaId) {
+    userFormError.value = 'Please select an LGA.'
     return
   }
-  if (needsWard.value && !addUserForm.wardId) {
-    addUserError.value = 'Please select a ward.'
+  if (needsWard.value && !userForm.wardId) {
+    userFormError.value = 'Please select a ward.'
     return
   }
-  addingUser.value = true
+  savingUser.value = true
   try {
-    await store.createUser({
-      fullName: addUserForm.fullName,
-      email: addUserForm.email,
-      password: addUserForm.password,
-      roleId: addUserForm.roleId,
-      roleName: selectedRoleName.value as UserRole,
-      // The LGA picker is also used to filter the ward dropdown for ward-scoped roles, but the
-      // API rejects a request that sets both — only send whichever scope the role actually needs.
-      lgaIds: needsWard.value ? undefined : (addUserForm.lgaId ? [addUserForm.lgaId] : undefined),
-      wardIds: needsWard.value ? (addUserForm.wardId ? [addUserForm.wardId] : undefined) : undefined,
-    })
-    addUserModalOpen.value = false
-    addUserForm.fullName = ''
-    addUserForm.email = ''
-    addUserForm.password = ''
-    addUserForm.roleId = ''
-    addUserForm.lgaId = ''
-    addUserForm.wardId = ''
+    if (editingUser.value) {
+      await store.updateUser(editingUser.value.id, {
+        fullName: userForm.fullName,
+        phone: userForm.phone || undefined,
+        roleId: userForm.roleId,
+        roleName: selectedRoleName.value as UserRole,
+        lgaIds: needsWard.value ? undefined : (userForm.lgaId ? [userForm.lgaId] : undefined),
+        wardIds: needsWard.value ? (userForm.wardId ? [userForm.wardId] : undefined) : undefined,
+      })
+      toast.add({ title: 'User updated', color: 'success' })
+    } else {
+      await store.createUser({
+        fullName: userForm.fullName,
+        email: userForm.email,
+        password: userForm.password,
+        roleId: userForm.roleId,
+        roleName: selectedRoleName.value as UserRole,
+        // The LGA picker is also used to filter the ward dropdown for ward-scoped roles, but the
+        // API rejects a request that sets both — only send whichever scope the role actually needs.
+        lgaIds: needsWard.value ? undefined : (userForm.lgaId ? [userForm.lgaId] : undefined),
+        wardIds: needsWard.value ? (userForm.wardId ? [userForm.wardId] : undefined) : undefined,
+      })
+      toast.add({ title: 'User created', color: 'success' })
+    }
+    userModalOpen.value = false
+    resetUserForm()
   } catch (e: any) {
-    addUserError.value = e.response?.data?.message ?? e.message
+    userFormError.value = e.response?.data?.message ?? e.message
   } finally {
-    addingUser.value = false
+    savingUser.value = false
   }
 }
 </script>

@@ -10,7 +10,6 @@ export const useUsersStore = defineStore('users', () => {
   const search = ref('')
   const roleFilter = ref<UserRole | 'All Roles'>('All Roles')
 
-  const pendingUsers = computed(() => users.value.filter(u => u.status === 'PendingApproval'))
   const activeUsers = computed(() => users.value.filter(u => u.status === 'Active'))
 
   async function fetchUsers() {
@@ -28,31 +27,43 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
-  async function approve(id: string) {
-    const updated = await usersApi.approveUser(id)
-    const i = users.value.findIndex(u => u.id === id)
-    if (i !== -1) users.value[i] = updated
-  }
-
-  async function reject(id: string) {
-    const updated = await usersApi.rejectUser(id)
-    const i = users.value.findIndex(u => u.id === id)
-    if (i !== -1) users.value[i] = updated
-  }
-
-  async function bulkCreateWardPAs(rows: Array<Partial<User>>) {
-    return usersApi.bulkCreateWardPAs(rows)
-  }
-
   async function createUser(dto: usersApi.CreateUserDto) {
     const user = await usersApi.createUser(dto)
     users.value.unshift(user)
     return user
   }
 
+  function replace(updated: User) {
+    const i = users.value.findIndex(u => u.id === updated.id)
+    if (i !== -1) users.value[i] = updated
+  }
+
+  async function updateUser(id: string, dto: usersApi.UpdateUserDto) {
+    const updated = await usersApi.updateUser(id, dto)
+    replace(updated)
+    return updated
+  }
+
+  async function setUserStatus(id: string, isActive: boolean) {
+    const updated = await usersApi.setUserStatus(id, isActive)
+    replace(updated)
+    return updated
+  }
+
+  async function resetUserPassword(id: string) {
+    return usersApi.resetUserPassword(id)
+  }
+
+  async function deleteUser(id: string) {
+    const updated = await usersApi.deleteUser(id)
+    replace(updated)
+    return updated
+  }
+
   return {
     users, loading, error, search, roleFilter,
-    pendingUsers, activeUsers,
-    fetchUsers, approve, reject, bulkCreateWardPAs, createUser,
+    activeUsers,
+    fetchUsers, createUser,
+    updateUser, setUserStatus, resetUserPassword, deleteUser,
   }
 })
