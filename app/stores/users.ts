@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { User, UserRole, UserStatus } from '~/types'
+import type { User, UserRole } from '~/types'
 import * as usersApi from '~/services/usersApi'
 
 export const useUsersStore = defineStore('users', () => {
@@ -9,13 +9,9 @@ export const useUsersStore = defineStore('users', () => {
 
   const search = ref('')
   const roleFilter = ref<UserRole | 'All Roles'>('All Roles')
-  const statusFilter = ref<UserStatus | 'All'>('All')
 
   const pendingUsers = computed(() => users.value.filter(u => u.status === 'PendingApproval'))
-  const invitedUsers = computed(() => users.value.filter(u => u.status === 'Invited'))
   const activeUsers = computed(() => users.value.filter(u => u.status === 'Active'))
-
-  const lastInviteLink = ref('')
 
   async function fetchUsers() {
     loading.value = true
@@ -24,7 +20,6 @@ export const useUsersStore = defineStore('users', () => {
       users.value = await usersApi.listUsers({
         search: search.value || undefined,
         role: roleFilter.value,
-        status: statusFilter.value,
       })
     } catch (e: any) {
       error.value = e.message ?? 'Failed to load users'
@@ -49,22 +44,15 @@ export const useUsersStore = defineStore('users', () => {
     return usersApi.bulkCreateWardPAs(rows)
   }
 
-  async function inviteUser(dto: usersApi.InviteUserDto) {
-    const { user, inviteLink } = await usersApi.inviteUser(dto)
+  async function createUser(dto: usersApi.CreateUserDto) {
+    const user = await usersApi.createUser(dto)
     users.value.unshift(user)
-    lastInviteLink.value = inviteLink
-    return { user, inviteLink }
-  }
-
-  async function resendInvite(id: string) {
-    const { inviteLink } = await usersApi.resendInvite(id)
-    lastInviteLink.value = inviteLink
-    return inviteLink
+    return user
   }
 
   return {
-    users, loading, error, search, roleFilter, statusFilter, lastInviteLink,
-    pendingUsers, invitedUsers, activeUsers,
-    fetchUsers, approve, reject, bulkCreateWardPAs, inviteUser, resendInvite,
+    users, loading, error, search, roleFilter,
+    pendingUsers, activeUsers,
+    fetchUsers, approve, reject, bulkCreateWardPAs, createUser,
   }
 })

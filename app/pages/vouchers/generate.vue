@@ -96,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['SuperAdmin', 'AKBPAAdmin'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin'] })
 
 import type { FoodItem, VoucherBatch } from '~/types'
 

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['SuperAdmin', 'AKBPAAdmin'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin', 'Voucher Receiving Officer', 'LGA Voucher Officer'] })
 
 const vouchersStore = useVouchersStore()
 onMounted(() => vouchersStore.fetchBatches())

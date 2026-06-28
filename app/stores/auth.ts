@@ -1,33 +1,33 @@
 import { defineStore } from 'pinia'
-import type { User, UserRole } from '~/types'
+import type { User } from '~/types'
 import * as authApi from '~/services/authApi'
 
+/** Cookies (not localStorage) so the session survives a hard refresh: useCookie is readable
+ *  during SSR (from the request's Cookie header), while localStorage only exists client-side —
+ *  a refresh would otherwise hit the server with no session and bounce to /login. */
+const COOKIE_OPTS = { maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' as const, path: '/' }
+
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(null)
-  const user = ref<User | null>(null)
-  const selectedRole = ref<UserRole | null>(null)
+  const token = useCookie<string | null>('akbpa_token', { ...COOKIE_OPTS, default: () => null })
+  const user = useCookie<User | null>('akbpa_user', { ...COOKIE_OPTS, default: () => null })
   const loading = ref(false)
 
   const isAuthenticated = computed(() => !!token.value)
   const role = computed(() => user.value?.role ?? null)
 
-  function selectRole(r: UserRole | null) {
-    selectedRole.value = r
-  }
-
-  async function login(roleToLogin: UserRole, email: string, password: string) {
+  async function login(email: string, password: string) {
     loading.value = true
     try {
-      const result = await authApi.login(roleToLogin, email, password)
+      const result = await authApi.login(email, password)
       token.value = result.accessToken
       user.value = result.user
-      if (process.client) {
-        localStorage.setItem('akbpa_token', token.value)
-        localStorage.setItem('akbpa_user', JSON.stringify(result.user))
-      }
     } finally {
       loading.value = false
     }
+  }
+
+  async function fetchMe() {
+    user.value = await authApi.getMe()
   }
 
   async function requestEmailVerification(email: string) {
@@ -38,12 +38,12 @@ export const useAuthStore = defineStore('auth', () => {
     return authApi.verifyEmailCode(email, code)
   }
 
-  async function submitRegistration(profile: Omit<User, 'id' | 'isActive' | 'status' | 'createdAt'>) {
+  async function submitRegistration(profile: Record<string, any>) {
     return authApi.submitRegistration(profile)
   }
 
   async function requestPasswordReset(email: string) {
-    return authApi.requestPasswordReset(email)
+    await authApi.requestPasswordReset(email)
   }
 
   async function resetPassword(token_: string, newPassword: string) {
@@ -54,53 +54,22 @@ export const useAuthStore = defineStore('auth', () => {
     return authApi.changePassword(currentPassword, newPassword)
   }
 
-  async function getInviteByToken(token_: string) {
-    return authApi.getInviteByToken(token_)
-  }
-
-  async function acceptInvite(token_: string, password: string) {
-    const result = await authApi.acceptInvite(token_, password)
-    token.value = result.accessToken
-    user.value = result.user
-    if (process.client) {
-      localStorage.setItem('akbpa_token', token.value)
-      localStorage.setItem('akbpa_user', JSON.stringify(result.user))
-    }
-  }
-
-  async function updateProfile(updates: Partial<User>) {
+  async function updateProfile(updates: { fullName?: string; phone?: string }) {
     if (!user.value) return
-    const updated = await authApi.updateProfile(user.value.id, updates)
-    user.value = updated
-    if (process.client) localStorage.setItem('akbpa_user', JSON.stringify(updated))
+    user.value = await authApi.updateProfile(updates)
   }
 
-  function restore() {
-    if (!process.client) return
-    const t = localStorage.getItem('akbpa_token')
-    const u = localStorage.getItem('akbpa_user')
-    if (t && u) {
-      token.value = t
-      user.value = JSON.parse(u)
-    }
-  }
-
-  function logout() {
+  async function logout() {
+    await authApi.logout()
     token.value = null
     user.value = null
-    selectedRole.value = null
-    if (process.client) {
-      localStorage.removeItem('akbpa_token')
-      localStorage.removeItem('akbpa_user')
-    }
     navigateTo('/login')
   }
 
   return {
-    token, user, selectedRole, loading, isAuthenticated, role,
-    selectRole, login, restore, logout,
+    token, user, loading, isAuthenticated, role,
+    login, fetchMe, logout,
     requestEmailVerification, verifyEmailCode, submitRegistration,
     requestPasswordReset, resetPassword, changePassword, updateProfile,
-    getInviteByToken, acceptInvite,
   }
 })

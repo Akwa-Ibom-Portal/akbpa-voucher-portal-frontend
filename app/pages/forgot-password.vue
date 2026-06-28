@@ -25,12 +25,6 @@
         If an account exists for <strong>{{ form.email }}</strong>, a password reset link has been sent.
       </p>
 
-      <UAlert v-if="mockLink" color="info" variant="subtle" class="mt-4 text-left" title="Demo mode — no email service is wired up yet">
-        <template #description>
-          <NuxtLink :to="mockLink" class="text-akbpaGreen-700 hover:underline break-all">{{ mockLink }}</NuxtLink>
-        </template>
-      </UAlert>
-
       <UButton to="/login" class="mt-6 pill-btn px-6" color="secondary">Back to Login</UButton>
     </div>
   </div>
@@ -43,13 +37,14 @@ const auth = useAuthStore()
 const form = reactive({ email: '' })
 const loading = ref(false)
 const sent = ref(false)
-const mockLink = ref('')
 
 async function onSubmit() {
   loading.value = true
-  const token = await auth.requestPasswordReset(form.email)
-  mockLink.value = token ? `/reset-password?token=${token}` : ''
-  sent.value = true
-  loading.value = false
+  try {
+    await auth.requestPasswordReset(form.email)
+  } finally {
+    sent.value = true
+    loading.value = false
+  }
 }
 </script>

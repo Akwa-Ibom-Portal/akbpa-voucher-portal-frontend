@@ -77,7 +77,7 @@
           {{ roleLabel }}
         </h1>
         <div class="flex items-center gap-2 sm:gap-3">
-          <UBadge v-if="auth.user?.role === 'WardPA'" color="neutral" variant="subtle" class="hidden sm:flex">
+          <UBadge v-if="auth.user?.role === 'Ward PA / Issuing Officer'" color="neutral" variant="subtle" class="hidden sm:flex">
             {{ wardLabel }}
           </UBadge>
           <UColorModeButton />
@@ -110,9 +110,9 @@ const mobileNavOpen = ref(false)
 const route = useRoute()
 watch(() => route.path, () => { mobileNavOpen.value = false })
 
-const fullName = computed(() => auth.user ? `${auth.user.firstName} ${auth.user.lastName}` : '')
+const fullName = computed(() => auth.user?.fullName ?? '')
 const roleLabel = computed(() => USER_ROLES.find(r => r.value === auth.role)?.label ?? '')
-const wardLabel = computed(() => lgaStore.wardName(auth.user?.wardId ?? ''))
+const wardLabel = computed(() => lgaStore.wardName(auth.user?.wardIds?.[0] ?? ''))
 
 const userMenuItems = [
   [{ label: fullName.value, slot: 'account', disabled: true }],

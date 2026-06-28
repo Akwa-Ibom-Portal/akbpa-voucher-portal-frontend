@@ -1,38 +1,52 @@
 <template>
   <div>
     <!-- Hero -->
-    <section class="relative overflow-hidden bg-gradient-to-br from-akbpaGreen-50 via-white to-amber-50 dark:from-akbpaGreen-950 dark:via-gray-950 dark:to-gray-900 text-gray-900 dark:text-white">
+    <section class="relative overflow-hidden bg-gradient-to-br from-akbpaGreen-700 via-akbpaGreen-800 to-akbpaGreen-900 text-white">
       <img
         src="/images/akwa-ibom-logo.jpeg"
         alt=""
-        class="pointer-events-none select-none absolute -right-24 top-1/2 -translate-y-1/2 h-[640px] w-[640px] opacity-[0.06]"
+        class="pointer-events-none select-none absolute -left-24 -top-24 h-[480px] w-[480px] opacity-[0.07]"
       />
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 lg:py-28 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <UBadge color="primary" variant="subtle" class="mb-4">2026 Stable Food Relief Cycle</UBadge>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 lg:py-0 grid lg:grid-cols-2 gap-8 items-center">
+        <div class="relative z-10 py-6 lg:py-20">
+          <UBadge variant="subtle" class="mb-4 bg-white/15 text-white ring-white/20">2026 Stable Food Relief Cycle</UBadge>
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
             Food Voucher Administration Portal
           </h1>
-          <p class="mt-5 text-lg text-gray-600 dark:text-white/80 max-w-lg">
+          <p class="mt-5 text-lg text-white/80 max-w-lg">
             Secure, QR-coded food vouchers for rice, beans and garri — delivered to
             Social Register beneficiaries across all 31 LGAs and 329 wards of
             Akwa Ibom State.
           </p>
           <div class="mt-8 flex flex-wrap gap-3">
-            <UButton to="/login" size="lg" color="secondary" class="pill-btn px-6">
-              Login to Portal
+            <UButton to="/login" size="lg" color="neutral" class="pill-btn px-6 bg-white text-akbpaGreen-800 hover:bg-white/90">
+              Existing User? Login
             </UButton>
-            <UButton to="/how-it-works" size="lg" color="primary" variant="outline" class="pill-btn px-6">
-              See how it works
+            <UButton to="/how-it-works" size="lg" color="secondary" class="pill-btn px-6">
+              See How It Works
             </UButton>
           </div>
+          <div class="mt-8 grid grid-cols-3 gap-3 max-w-md">
+            <div v-for="item in items" :key="item.name" class="bg-white/10 ring-1 ring-white/15 rounded-xl p-3 text-center backdrop-blur-sm">
+              <p class="text-2xl">{{ item.emoji }}</p>
+              <p class="text-xs font-semibold mt-1">{{ item.name }}</p>
+              <p class="text-[11px] text-white/60">{{ item.size }}</p>
+            </div>
+          </div>
         </div>
-        <div class="grid grid-cols-3 gap-4">
-          <UCard v-for="item in items" :key="item.name" class="bg-white dark:bg-white/10 shadow-sm text-center">
-            <p class="text-3xl">{{ item.emoji }}</p>
-            <p class="font-semibold mt-2">{{ item.name }}</p>
-            <p class="text-xs text-gray-500 dark:text-white/70">{{ item.size }}</p>
-          </UCard>
+
+        <div class="relative z-10 flex justify-center lg:justify-end">
+          <UCarousel
+            v-slot="{ item }"
+            :items="governorImages"
+            :autoplay="{ delay: 4500 }"
+            dots
+            loop
+            class="w-full max-w-sm"
+            :ui="{ dot: 'bg-white/30 data-[state=active]:bg-white' }"
+          >
+            <img :src="item" alt="Governor of Akwa Ibom State" class="w-full h-[340px] sm:h-[420px] lg:h-[480px] object-contain mx-auto" />
+          </UCarousel>
         </div>
       </div>
     </section>
@@ -68,20 +82,56 @@
     </section>
 
     <!-- Leadership message -->
-    <section class="bg-akbpaGreen-800 text-white py-16">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        <!-- Placeholder avatar — swap for an official photo of the Governor/AKBPA leadership once supplied. -->
-        <div class="h-20 w-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-5 ring-2 ring-white/20">
-          <UIcon name="i-lucide-user-round" class="size-9 text-white/70" />
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+        <div>
+          <div class="bg-akbpaGreen-700 rounded-3xl overflow-hidden">
+            <img src="/images/governor-image-2.webp" alt="Governor of Akwa Ibom State" class="w-full h-[420px] object-contain object-bottom mx-auto" />
+          </div>
+          <h3 class="mt-5 text-xl font-bold text-gray-900 dark:text-white">Pastor Umo Eno</h3>
+          <p class="text-gray-500">Executive Governor of Akwa Ibom State</p>
+          <p class="mt-4 text-gray-600 dark:text-white/80 leading-relaxed">
+            <span class="text-3xl text-akbpaGreen-300 leading-none align-top">&ldquo;</span>
+            We are committed to ensuring that <strong>every grain of rice, every bag of
+            beans and garri</strong> reaches the families who need it most — delivered
+            transparently, accountably, and without delay.
+          </p>
         </div>
-        <p class="text-lg sm:text-xl leading-relaxed">
-          "Every grain of rice, every bag of beans and garri delivered through this
-          programme is a direct investment in the dignity of our people. This portal
-          ensures that investment reaches exactly who it was meant for — transparently,
-          securely, and without delay."
-        </p>
-        <p class="mt-5 font-semibold">Office of the Governor</p>
-        <p class="text-sm text-white/70">Akwa Ibom State Government</p>
+
+        <div class="grid sm:grid-cols-2 gap-5">
+          <UCard class="bg-white dark:bg-white/5 shadow-sm">
+            <UIcon name="i-lucide-users" class="size-7 text-akbpaGreen-600 mb-3" />
+            <p class="font-bold text-gray-900 dark:text-white">Reaching Every Household</p>
+            <p class="text-sm text-gray-500 mt-2">
+              Delivering rice, beans and garri directly to Social Register
+              beneficiaries across all 31 LGAs and 329 wards of the state.
+            </p>
+          </UCard>
+          <UCard class="bg-akbpaGreen-800 text-white border-none">
+            <UIcon name="i-lucide-qr-code" class="size-7 text-akbpaGreen-200 mb-3" />
+            <p class="font-bold">Tech-Driven Distribution</p>
+            <p class="text-sm text-white/75 mt-2">
+              QR-coded vouchers track every stage — generation, allocation,
+              issuance and redemption — in real time.
+            </p>
+          </UCard>
+          <UCard class="bg-akbpaGreen-800 text-white border-none">
+            <UIcon name="i-lucide-heart-handshake" class="size-7 text-akbpaGreen-200 mb-3" />
+            <p class="font-bold">Standing With Akwa Ibom Families</p>
+            <p class="text-sm text-white/75 mt-2">
+              It is the desire of the Governor that no eligible household on
+              the Social Register is left behind in this relief programme.
+            </p>
+          </UCard>
+          <UCard class="bg-white dark:bg-white/5 shadow-sm">
+            <UIcon name="i-lucide-shield-check" class="size-7 text-akbpaGreen-600 mb-3" />
+            <p class="font-bold text-gray-900 dark:text-white">Transparent, Auditable Access</p>
+            <p class="text-sm text-gray-500 mt-2">
+              Every redemption is logged and auditable, ensuring fair and
+              accountable distribution of relief to the people it's meant for.
+            </p>
+          </UCard>
+        </div>
       </div>
     </section>
 
@@ -128,6 +178,12 @@
 import { USER_ROLES } from '~/types'
 
 definePageMeta({ layout: 'public' })
+
+const governorImages: string[] = [
+  '/images/governor-image-1.webp',
+  '/images/governor-image-2.webp',
+  '/images/governor-image-3.webp',
+]
 
 const items = [
   { name: 'Rice', size: '5kg bag', emoji: '🍚' },

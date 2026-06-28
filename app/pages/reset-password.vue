@@ -6,10 +6,10 @@
 
       <UForm :state="form" class="space-y-4" @submit="onSubmit">
         <UFormField label="New password" name="password">
-          <UInput v-model="form.password" type="password" icon="i-lucide-lock" class="w-full" />
+          <PasswordInput v-model="form.password" />
         </UFormField>
         <UFormField label="Confirm new password" name="confirm">
-          <UInput v-model="form.confirm" type="password" icon="i-lucide-lock" class="w-full" />
+          <PasswordInput v-model="form.confirm" />
         </UFormField>
         <UAlert v-if="error" color="error" variant="subtle" :title="error" />
         <UButton type="submit" block size="lg" color="secondary" class="pill-btn" :loading="loading">Reset Password</UButton>

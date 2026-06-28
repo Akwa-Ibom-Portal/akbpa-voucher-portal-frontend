@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['SuperAdmin', 'AKBPAAdmin', 'SocialRegisterOfficer', 'WardPA'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin', 'Ward PA / Issuing Officer'] })
 
 const auth = useAuthStore()
 const store = useBeneficiariesStore()
@@ -59,8 +59,8 @@ onMounted(async () => {
 
   // Ward PA is hard-scoped to their own ward — enforced here client-side and must
   // also be enforced server-side from the JWT claim, never trusted from the request alone.
-  if (auth.role === 'WardPA' && auth.user?.wardId) {
-    store.wardFilter = auth.user.wardId
+  if (auth.role === 'Ward PA / Issuing Officer' && auth.user?.wardIds?.[0]) {
+    store.wardFilter = auth.user.wardIds[0]
   }
   await store.fetchBeneficiaries()
 })

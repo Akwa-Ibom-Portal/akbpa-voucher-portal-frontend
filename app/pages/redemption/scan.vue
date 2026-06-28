@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'scanner', middleware: ['auth', 'role'], role: ['RedemptionOfficer'] })
+definePageMeta({ layout: 'scanner', middleware: ['auth', 'role'], role: ['Redemption Officer'] })
 
 import { QrcodeStream } from 'vue-qrcode-reader'
 import type { Voucher } from '~/types'

@@ -28,6 +28,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.114"
+    "@iconify-json/lucide": "^1.2.114",
+    "vue-tsc": "^3.3.5"
   }
 }

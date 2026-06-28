@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['AKBPAAdmin', 'RedemptionOfficer'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['AKBPA Admin', 'Redemption Officer'] })
 
 import type { Beneficiary, FoodItem } from '~/types'
 

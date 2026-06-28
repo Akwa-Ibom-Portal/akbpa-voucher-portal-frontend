@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['WardPA'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Ward PA / Issuing Officer'] })
 
 import type { Beneficiary, FoodItem } from '~/types'
 
@@ -63,13 +63,13 @@ const selected = ref<Beneficiary | null>(null)
 const justIssued = ref('')
 const issuing = ref<FoodItem | ''>('')
 
-const wardLabel = computed(() => lgaStore.wardName(auth.user?.wardId ?? ''))
+const wardLabel = computed(() => lgaStore.wardName(auth.user?.wardIds?.[0] ?? ''))
 
 onMounted(async () => {
   await lgaStore.ensureLoaded()
   // Hard ward scope: a Ward PA only ever sees beneficiaries in their own ward —
   // enforced here and must also be enforced server-side from the JWT claim.
-  beneficiariesStore.wardFilter = auth.user?.wardId ?? ''
+  beneficiariesStore.wardFilter = auth.user?.wardIds?.[0] ?? ''
   await beneficiariesStore.fetchBeneficiaries()
 })
 

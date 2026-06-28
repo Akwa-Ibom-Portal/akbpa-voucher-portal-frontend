@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['SuperAdmin', 'AKBPAAdmin', 'SocialRegisterOfficer', 'WardPA', 'Viewer'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin', 'Ward PA / Issuing Officer', 'Viewer / Auditor'] })
 
 const reportsStore = useReportsStore()
 const lgaStore = useLgaStore()

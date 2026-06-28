@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['SuperAdmin'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin'] })
 
 const store = useAuditLogsStore()
 onMounted(() => store.fetchLogs())

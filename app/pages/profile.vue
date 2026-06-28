@@ -18,11 +18,8 @@
       </div>
 
       <UForm :state="profileForm" class="grid sm:grid-cols-2 gap-4" @submit="onSaveProfile">
-        <UFormField label="First Name" name="firstName">
-          <UInput v-model="profileForm.firstName" class="w-full" />
-        </UFormField>
-        <UFormField label="Last Name" name="lastName">
-          <UInput v-model="profileForm.lastName" class="w-full" />
+        <UFormField label="Full Name" name="fullName" class="sm:col-span-2">
+          <UInput v-model="profileForm.fullName" class="w-full" />
         </UFormField>
         <UFormField label="Email" name="email">
           <UInput :model-value="auth.user?.email" disabled class="w-full" />
@@ -31,10 +28,11 @@
           <UInput v-model="profileForm.phone" class="w-full" />
         </UFormField>
 
+        <UAlert v-if="profileError" color="error" variant="subtle" :title="profileError" class="sm:col-span-2" />
         <UAlert v-if="profileSaved" color="success" variant="subtle" title="Profile updated." class="sm:col-span-2" />
 
         <div class="sm:col-span-2">
-          <UButton type="submit">Save Changes</UButton>
+          <UButton type="submit" :loading="profileSaving">Save Changes</UButton>
         </div>
       </UForm>
     </UCard>
@@ -45,13 +43,13 @@
       </template>
       <UForm :state="passwordForm" class="space-y-4" @submit="onChangePassword">
         <UFormField label="Current password" name="current">
-          <UInput v-model="passwordForm.current" type="password" class="w-full" />
+          <PasswordInput v-model="passwordForm.current" />
         </UFormField>
         <UFormField label="New password" name="new">
-          <UInput v-model="passwordForm.new" type="password" class="w-full" />
+          <PasswordInput v-model="passwordForm.new" />
         </UFormField>
         <UFormField label="Confirm new password" name="confirm">
-          <UInput v-model="passwordForm.confirm" type="password" class="w-full" />
+          <PasswordInput v-model="passwordForm.confirm" />
         </UFormField>
 
         <UAlert v-if="pwError" color="error" variant="subtle" :title="pwError" />
@@ -70,19 +68,29 @@ import { USER_ROLES } from '~/types'
 
 const auth = useAuthStore()
 
-const fullName = computed(() => auth.user ? `${auth.user.firstName} ${auth.user.lastName}` : '')
+const fullName = computed(() => auth.user?.fullName ?? '')
 const roleLabel = computed(() => USER_ROLES.find(r => r.value === auth.role)?.label ?? '')
 
 const profileForm = reactive({
-  firstName: auth.user?.firstName ?? '',
-  lastName: auth.user?.lastName ?? '',
+  fullName: auth.user?.fullName ?? '',
   phone: auth.user?.phone ?? '',
 })
+const profileSaving = ref(false)
 const profileSaved = ref(false)
+const profileError = ref('')
 
-function onSaveProfile() {
-  auth.updateProfile({ firstName: profileForm.firstName, lastName: profileForm.lastName, phone: profileForm.phone })
-  profileSaved.value = true
+async function onSaveProfile() {
+  profileError.value = ''
+  profileSaved.value = false
+  profileSaving.value = true
+  try {
+    await auth.updateProfile({ fullName: profileForm.fullName, phone: profileForm.phone })
+    profileSaved.value = true
+  } catch (e: any) {
+    profileError.value = e.response?.data?.message ?? e.message
+  } finally {
+    profileSaving.value = false
+  }
 }
 
 const passwordForm = reactive({ current: '', new: '', confirm: '' })
@@ -105,7 +113,7 @@ async function onChangePassword() {
     passwordForm.new = ''
     passwordForm.confirm = ''
   } catch (e: any) {
-    pwError.value = e.message
+    pwError.value = e.response?.data?.message ?? e.message
   } finally {
     pwLoading.value = false
   }

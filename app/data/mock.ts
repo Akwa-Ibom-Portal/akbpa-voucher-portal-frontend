@@ -8,14 +8,14 @@ const ikotEkpene = lgas.find(l => l.name === 'Ikot Ekpene')!
 const useOffotWard = wards.find(w => w.lgaId === uyo.id)! // placeholder "Ward 1" standing in for Use Offot
 
 export const mockUsers: User[] = [
-  { id: 'u-1', firstName: 'Super', lastName: 'Admin', email: 'superadmin@akbpa.gov.ng', role: 'SuperAdmin', isActive: true, status: 'Active', lastLoginAt: '2026-06-24T08:12:00Z', createdAt: '2026-01-05T09:00:00Z' },
-  { id: 'u-2', firstName: 'AKBPA', lastName: 'Admin', email: 'admin@akbpa.gov.ng', role: 'AKBPAAdmin', isActive: true, status: 'Active', lastLoginAt: '2026-06-24T07:50:00Z', createdAt: '2026-01-10T09:00:00Z' },
-  { id: 'u-3', firstName: 'Grace', lastName: 'Etuk', email: 'register@akbpa.gov.ng', role: 'SocialRegisterOfficer', isActive: true, status: 'Active', lastLoginAt: '2026-06-23T16:30:00Z', createdAt: '2026-01-12T09:00:00Z' },
-  { id: 'u-4', firstName: 'Mfon', lastName: 'Akpabio', email: 'wardpa.useoffot@akbpa.gov.ng', role: 'WardPA', lgaId: uyo.id, wardId: useOffotWard.id, isActive: true, status: 'Active', lastLoginAt: '2026-06-24T06:41:00Z', createdAt: '2026-02-01T09:00:00Z' },
-  { id: 'u-5', firstName: 'Distribution', lastName: 'Officer', email: 'officer.ikotekpene@akbpa.gov.ng', role: 'RedemptionOfficer', lgaId: ikotEkpene.id, isActive: true, status: 'Active', lastLoginAt: '2026-06-24T09:32:00Z', createdAt: '2026-02-03T09:00:00Z' },
-  { id: 'u-6', firstName: 'Commissioner', lastName: 'Office', email: 'viewer@akbpa.gov.ng', role: 'Viewer', isActive: true, status: 'Active', lastLoginAt: '2026-06-20T12:00:00Z', createdAt: '2026-02-10T09:00:00Z' },
-  { id: 'u-7', firstName: 'Edidiong', lastName: 'Sampson', email: 'edidiong.sampson@gmail.com', phone: '08031234567', nin: '21098765432', role: 'WardPA', isActive: false, status: 'PendingApproval', idDocumentName: 'staff-id-edidiong.pdf', createdAt: '2026-06-23T14:20:00Z' },
-  { id: 'u-8', firstName: 'Daniel', lastName: 'Ekong', email: 'daniel.ekong@gmail.com', phone: '08079988776', nin: '21034567890', role: 'RedemptionOfficer', lgaId: ikotEkpene.id, isActive: false, status: 'PendingApproval', idDocumentName: 'staff-id-daniel.pdf', createdAt: '2026-06-24T09:05:00Z' },
+  { id: 'u-1', fullName: 'Super Admin', email: 'superadmin@akbpa.gov.ng', role: 'Super Admin', isActive: true, status: 'Active', lastLoginAt: '2026-06-24T08:12:00Z', createdAt: '2026-01-05T09:00:00Z' },
+  { id: 'u-2', fullName: 'AKBPA Admin', email: 'admin@akbpa.gov.ng', role: 'AKBPA Admin', isActive: true, status: 'Active', lastLoginAt: '2026-06-24T07:50:00Z', createdAt: '2026-01-10T09:00:00Z' },
+  { id: 'u-3', fullName: 'Grace Etuk', email: 'register@akbpa.gov.ng', role: 'AKBPA Admin', isActive: true, status: 'Active', lastLoginAt: '2026-06-23T16:30:00Z', createdAt: '2026-01-12T09:00:00Z' },
+  { id: 'u-4', fullName: 'Mfon Akpabio', email: 'wardpa.useoffot@akbpa.gov.ng', role: 'Ward PA / Issuing Officer', lgaIds: [uyo.id], wardIds: [useOffotWard.id], isActive: true, status: 'Active', lastLoginAt: '2026-06-24T06:41:00Z', createdAt: '2026-02-01T09:00:00Z' },
+  { id: 'u-5', fullName: 'Distribution Officer', email: 'officer.ikotekpene@akbpa.gov.ng', role: 'Redemption Officer', lgaIds: [ikotEkpene.id], isActive: true, status: 'Active', lastLoginAt: '2026-06-24T09:32:00Z', createdAt: '2026-02-03T09:00:00Z' },
+  { id: 'u-6', fullName: 'Commissioner Office', email: 'viewer@akbpa.gov.ng', role: 'Viewer / Auditor', isActive: true, status: 'Active', lastLoginAt: '2026-06-20T12:00:00Z', createdAt: '2026-02-10T09:00:00Z' },
+  { id: 'u-7', fullName: 'Edidiong Sampson', email: 'edidiong.sampson@gmail.com', phone: '08031234567', nin: '21098765432', role: 'Ward PA / Issuing Officer', isActive: false, status: 'PendingApproval', idDocumentName: 'staff-id-edidiong.pdf', createdAt: '2026-06-23T14:20:00Z' },
+  { id: 'u-8', fullName: 'Daniel Ekong', email: 'daniel.ekong@gmail.com', phone: '08079988776', nin: '21034567890', role: 'Redemption Officer', lgaIds: [ikotEkpene.id], isActive: false, status: 'PendingApproval', idDocumentName: 'staff-id-daniel.pdf', createdAt: '2026-06-24T09:05:00Z' },
 ]
 
 const firstNames = [

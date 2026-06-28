@@ -3,8 +3,8 @@
     <header class="border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 py-2 flex items-center justify-between">
         <NuxtLink to="/" class="flex items-center gap-3">
-          <img src="/images/akwa-ibom-logo.jpeg" alt="Government of Akwa Ibom State" class="h-11 w-11 rounded-full object-cover" />
-          <div class="leading-tight">
+          <img src="/images/logo-light.webp" alt="Government of Akwa Ibom State" class="h-10 w-auto object-contain" />
+          <div class="leading-tight hidden sm:block">
             <p class="font-semibold text-gray-900 dark:text-white text-sm">AKBPA Food Voucher Portal</p>
             <p class="text-xs text-gray-500">Akwa Ibom Bulk Purchase Agency</p>
           </div>
@@ -19,7 +19,7 @@
 
         <div class="hidden md:flex items-center gap-2">
           <UColorModeButton />
-          <UButton to="/register" color="neutral" variant="outline" size="md" class="pill-btn px-5">Register</UButton>
+          <!-- <UButton to="/register" color="neutral" variant="outline" size="md" class="pill-btn px-5">Register</UButton> -->
           <UButton to="/login" color="primary" size="md" class="pill-btn px-5">Login</UButton>
         </div>
 
@@ -72,7 +72,7 @@
           <p class="font-semibold text-sm mb-3">Portal Access</p>
           <ul class="space-y-2 text-sm text-white/70">
             <li><NuxtLink to="/login" class="hover:text-akbpaOrange-300">Staff &amp; Ward PA login</NuxtLink></li>
-            <li><NuxtLink to="/register" class="hover:text-akbpaOrange-300">Request staff access</NuxtLink></li>
+            <!-- <li><NuxtLink to="/register" class="hover:text-akbpaOrange-300">Request staff access</NuxtLink></li> -->
             <li><NuxtLink to="/forgot-password" class="hover:text-akbpaOrange-300">Forgot password</NuxtLink></li>
             <li><NuxtLink to="/redemption/scan" class="hover:text-akbpaOrange-300">Redemption scanner</NuxtLink></li>
           </ul>

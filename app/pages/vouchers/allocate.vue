@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['SuperAdmin', 'AKBPAAdmin'] })
+definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin', 'LGA Voucher Officer'] })
 
 const vouchersStore = useVouchersStore()
 const lgaStore = useLgaStore()
@@ -65,8 +65,8 @@ onMounted(async () => {
 const batchOptions = computed(() => vouchersStore.batches.map(b => ({ label: b.batchCode, value: b.id })))
 const lgaOptions = computed(() => lgaStore.lgas.map(l => ({ label: l.name, value: l.id })))
 const officerOptions = computed(() => usersStore.users
-  .filter(u => ['WardPA', 'RedemptionOfficer', 'AKBPAAdmin'].includes(u.role))
-  .map(u => ({ label: `${u.firstName} ${u.lastName} (${u.role})`, value: u.id })))
+  .filter(u => ['Ward PA / Issuing Officer', 'Redemption Officer', 'AKBPA Admin'].includes(u.role))
+  .map(u => ({ label: `${u.fullName} (${u.role})`, value: u.id })))
 
 const targets = [
   { label: 'LGA', value: 'Lga' },

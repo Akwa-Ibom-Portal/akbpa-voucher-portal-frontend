@@ -75,7 +75,7 @@
           <UFormField label="LGA" name="lgaId" required>
             <USelect v-model="profileForm.lgaId" :items="lgaOptions" class="w-full" @change="profileForm.wardId = ''" />
           </UFormField>
-          <UFormField v-if="profileForm.role === 'WardPA'" label="Ward" name="wardId" required>
+          <UFormField v-if="profileForm.role === 'Ward PA / Issuing Officer'" label="Ward" name="wardId" required>
             <USelect v-model="profileForm.wardId" :items="wardOptions" :disabled="!profileForm.lgaId" class="w-full" />
           </UFormField>
         </div>
@@ -152,7 +152,7 @@ const emailForm = reactive({ email: '' })
 const codeForm = reactive({ code: '' })
 const profileForm = reactive({
   firstName: '', middleName: '', lastName: '', phone: '', nin: '',
-  role: 'WardPA' as UserRole, lgaId: '', wardId: '',
+  role: 'Ward PA / Issuing Officer' as UserRole, lgaId: '', wardId: '',
   consentData: false, consentTerms: false,
 })
 const photoName = ref('')
@@ -165,8 +165,8 @@ const maskedEmail = computed(() => {
 })
 
 // SuperAdmin is never self-requestable — only a SuperAdmin can promote someone to it.
-const requestableRoles = USER_ROLES.filter(r => r.value !== 'SuperAdmin').map(r => ({ label: r.label, value: r.value }))
-const needsScope = computed(() => ['WardPA', 'RedemptionOfficer', 'AKBPAAdmin'].includes(profileForm.role))
+const requestableRoles = USER_ROLES.filter(r => r.value !== 'Super Admin').map(r => ({ label: r.label, value: r.value }))
+const needsScope = computed(() => ['Ward PA / Issuing Officer', 'Redemption Officer', 'AKBPA Admin', 'LGA Voucher Officer'].includes(profileForm.role))
 
 const lgaStore = useLgaStore()
 onMounted(() => lgaStore.ensureLoaded())
@@ -219,7 +219,7 @@ async function onSubmitProfile() {
     error.value = 'Please select an LGA.'
     return
   }
-  if (profileForm.role === 'WardPA' && !profileForm.wardId) {
+  if (profileForm.role === 'Ward PA / Issuing Officer' && !profileForm.wardId) {
     error.value = 'Please select a ward.'
     return
   }
