@@ -50,11 +50,54 @@ body {
 
 /* Hover lift for cards/tiles */
 .hover-lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .hover-lift:hover {
   transform: translateY(-5px);
   box-shadow: 0 16px 28px -12px rgb(0 0 0 / 0.18);
+}
+
+/* Brand gradient headline accents — used sparingly on one or two key words per page.
+ * Two variants: the default for dark text on light backgrounds, `-light` for white text
+ * on dark/colored backgrounds (hero, green CTA bands) where the dark variant would be muddy. */
+.gradient-text {
+  background-image: linear-gradient(90deg, var(--color-akbpaGreen-500), var(--color-akbpaOrange-500));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.gradient-text-light {
+  background-image: linear-gradient(90deg, #ffffff, var(--color-akbpaOrange-200));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Soft blurred color blobs for depth behind otherwise flat sections — purely decorative,
+ * so always inert (pointer-events disabled, aria-hidden in markup). */
+.bg-blob {
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+/* Fine dot-grid texture for hero/banner sections — subtle, not a loud repeating pattern */
+.bg-dot-grid {
+  background-image: radial-gradient(rgb(255 255 255 / 0.18) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Continuous horizontal scroll, used for the partners strip */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-marquee {
+    animation: marquee 28s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
 }
 
 /* Gentle continuous bob, used sparingly (emoji, icons) */

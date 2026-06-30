@@ -102,9 +102,10 @@
     </section>
 
     <!-- Vision & Mission -->
-    <section class="bg-akbpaGreen-800 text-white py-16">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 gap-6">
-        <div v-reveal class="bg-white/10 rounded-2xl p-6">
+    <section class="relative overflow-hidden bg-gradient-to-br from-akbpaGreen-800 via-akbpaGreen-900 to-akbpaGreen-800 text-white py-16">
+      <div aria-hidden="true" class="bg-blob absolute -z-10 top-0 right-0 size-72 rounded-full bg-akbpaOrange-400/15" />
+      <div class="relative max-w-5xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 gap-6">
+        <div v-reveal class="bg-white/10 rounded-2xl p-6 hover-lift">
           <UIcon name="i-lucide-telescope" class="size-7 text-akbpaOrange-300 mb-3" />
           <h3 class="font-bold text-lg mb-2">Our Vision</h3>
           <p class="text-sm text-white/80 leading-relaxed">
@@ -113,7 +114,7 @@
             improves access to affordable food for every resident of Akwa Ibom State.
           </p>
         </div>
-        <div v-reveal="100" class="bg-white/10 rounded-2xl p-6">
+        <div v-reveal="100" class="bg-white/10 rounded-2xl p-6 hover-lift">
           <UIcon name="i-lucide-target" class="size-7 text-akbpaOrange-300 mb-3" />
           <h3 class="font-bold text-lg mb-2">Our Mission</h3>
           <p class="text-sm text-white/80 leading-relaxed">
@@ -133,8 +134,13 @@
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">What Guides Our Work</h2>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <UCard v-for="(v, i) in coreValues" :key="v.title" v-reveal="(i % 4) * 80" class="hover-lift">
-          <UIcon :name="v.icon" class="size-6 text-akbpaGreen-600 mb-3" />
+        <UCard
+          v-for="(v, i) in coreValues" :key="v.title" v-reveal="(i % 4) * 80"
+          class="hover-lift border-transparent hover:border-akbpaGreen-300 dark:hover:border-akbpaGreen-700"
+        >
+          <div class="h-11 w-11 rounded-xl bg-akbpaGreen-50 dark:bg-akbpaGreen-950 flex items-center justify-center mb-3">
+            <UIcon :name="v.icon" class="size-5 text-akbpaGreen-600" />
+          </div>
           <p class="font-semibold text-gray-900 dark:text-white">{{ v.title }}</p>
           <p class="text-sm text-gray-500 mt-2">{{ v.desc }}</p>
         </UCard>
@@ -242,9 +248,10 @@
     </section>
 
     <!-- CTA -->
-    <section class="bg-akbpaGreen-800 text-white py-16">
+    <section class="relative overflow-hidden bg-gradient-to-br from-akbpaGreen-700 to-akbpaGreen-900 text-white py-16">
+      <div aria-hidden="true" class="bg-blob absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[420px] rounded-full bg-akbpaOrange-400/10" />
       <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <h2 class="text-2xl font-bold">Partner With Us</h2>
+        <h2 class="text-2xl font-bold">Partner <span class="gradient-text-light">With Us</span></h2>
         <p class="mt-3 text-white/80">
           Whether you are a farmer, cooperative, supplier, development partner,
           community organization, or interested citizen, we invite you to join us in

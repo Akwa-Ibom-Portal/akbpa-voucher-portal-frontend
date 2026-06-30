@@ -15,12 +15,15 @@
         <img :src="item" alt="" class="w-full h-full object-cover" />
       </UCarousel>
       <div class="absolute inset-0 z-[1] bg-gradient-to-r from-akbpaGreen-900/95 via-akbpaGreen-900/80 to-akbpaGreen-900/50" />
+      <div aria-hidden="true" class="bg-blob absolute z-[1] -top-24 -right-24 size-[420px] rounded-full bg-akbpaOrange-400/30" />
+      <div aria-hidden="true" class="bg-blob absolute z-[1] bottom-0 left-1/3 size-[320px] rounded-full bg-akbpaGreen-300/20" />
 
       <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full">
         <div class="max-w-2xl py-16 lg:py-0 animate-pop-in">
           <UBadge variant="subtle" class="mb-4 bg-white/15 text-white ring-white/20">Akwa Ibom State Bulk Purchase Agency</UBadge>
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-            Ensuring Food Security. Promoting Affordability. Strengthening Communities.
+            Ensuring Food Security. Promoting Affordability.
+            <span class="gradient-text-light">Strengthening Communities.</span>
           </h1>
           <p class="mt-4 text-lg text-akbpaOrange-200 font-medium">Together, We Are Building a More Food-Secure Akwa Ibom.</p>
           <p class="mt-4 text-white/80 max-w-xl">
@@ -136,6 +139,9 @@
           v-reveal="i * 80"
           class="hover-lift rounded-2xl p-6 text-center" :class="statBg(i)"
         >
+          <div class="h-10 w-10 rounded-full bg-white/70 dark:bg-white/10 flex items-center justify-center mx-auto mb-3">
+            <UIcon :name="s.icon" class="size-5 text-akbpaGreen-700" />
+          </div>
           <p class="text-2xl sm:text-3xl font-bold text-gray-800">{{ (displayedStats[i] ?? 0).toLocaleString() }}{{ s.suffix }}</p>
           <p class="text-sm text-gray-600 mt-1">{{ s.label }}</p>
         </div>
@@ -153,8 +159,13 @@
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Serving Citizens Through Strategic Food Security Initiatives</h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <UCard v-for="(s, i) in services" :key="s.title" v-reveal="(i % 3) * 100" class="hover-lift">
-            <UIcon :name="s.icon" class="size-7 text-akbpaGreen-600 mb-3" />
+          <UCard
+            v-for="(s, i) in services" :key="s.title" v-reveal="(i % 3) * 100"
+            class="hover-lift border-transparent hover:border-akbpaGreen-300 dark:hover:border-akbpaGreen-700"
+          >
+            <div class="h-12 w-12 rounded-xl bg-akbpaGreen-50 dark:bg-akbpaGreen-950 flex items-center justify-center mb-4">
+              <UIcon :name="s.icon" class="size-6 text-akbpaGreen-600" />
+            </div>
             <p class="font-semibold text-gray-900 dark:text-white">{{ s.title }}</p>
             <p class="text-sm text-gray-500 mt-2">{{ s.desc }}</p>
           </UCard>
@@ -169,7 +180,13 @@
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Programmes Making a Difference</h2>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <UCard v-for="(p, i) in programmes" :key="p.title" v-reveal="i * 100" class="hover-lift flex flex-col">
+        <UCard
+          v-for="(p, i) in programmes" :key="p.title" v-reveal="i * 100"
+          class="hover-lift flex flex-col border-transparent hover:border-akbpaOrange-300 dark:hover:border-akbpaOrange-700"
+        >
+          <div class="h-12 w-12 rounded-xl bg-akbpaOrange-50 dark:bg-akbpaOrange-950 flex items-center justify-center mb-4">
+            <UIcon :name="p.icon" class="size-6 text-akbpaOrange-500" />
+          </div>
           <p class="font-semibold text-gray-900 dark:text-white">{{ p.title }}</p>
           <p class="text-sm text-gray-500 mt-2 flex-1">{{ p.desc }}</p>
           <UButton :to="p.to" variant="link" color="primary" class="px-0 mt-3 justify-start">{{ p.cta }} →</UButton>
@@ -178,9 +195,11 @@
     </section>
 
     <!-- Why choose AKSBPA -->
-    <section class="bg-akbpaGreen-800 text-white py-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <h2 v-reveal class="text-2xl font-bold text-center mb-10">Why Choose AKSBPA?</h2>
+    <section class="relative overflow-hidden bg-gradient-to-br from-akbpaGreen-800 via-akbpaGreen-900 to-akbpaGreen-800 text-white py-16">
+      <div aria-hidden="true" class="bg-blob absolute -top-20 -left-20 size-72 rounded-full bg-akbpaOrange-400/20" />
+      <div aria-hidden="true" class="bg-blob absolute -bottom-24 -right-16 size-80 rounded-full bg-akbpaGreen-400/20" />
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6">
+        <h2 v-reveal class="text-2xl font-bold text-center mb-10">Why Choose <span class="gradient-text-light">AKSBPA</span>?</h2>
         <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
           <div v-for="(w, i) in whyChoose" :key="w.title" v-reveal="i * 80" class="text-center">
             <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-3">
@@ -251,12 +270,16 @@
     </section>
 
     <!-- Partners -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center">
-      <UBadge color="secondary" variant="subtle" class="mb-3">Partners</UBadge>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Working Together for Food Security</h2>
-      <p class="text-gray-500 mt-2 max-w-2xl mx-auto">AKSBPA collaborates with:</p>
-      <div class="flex flex-wrap justify-center gap-3 mt-8">
-        <UBadge v-for="p in partners" :key="p" variant="subtle" color="neutral" size="lg" class="px-4 py-2">{{ p }}</UBadge>
+    <section class="py-16 text-center">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <UBadge color="secondary" variant="subtle" class="mb-3">Partners</UBadge>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Working Together for Food Security</h2>
+        <p class="text-gray-500 mt-2 max-w-2xl mx-auto">AKSBPA collaborates with:</p>
+      </div>
+      <div class="mt-8 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+        <div class="flex w-max gap-3 animate-marquee">
+          <UBadge v-for="(p, i) in [...partners, ...partners]" :key="i" variant="subtle" color="neutral" size="lg" class="px-4 py-2 whitespace-nowrap">{{ p }}</UBadge>
+        </div>
       </div>
     </section>
 
@@ -298,8 +321,9 @@
     </section>
 
     <!-- Newsletter -->
-    <section class="bg-akbpaGreen-800 text-white py-16">
-      <div class="max-w-2xl mx-auto px-4 sm:px-6 text-center">
+    <section class="relative overflow-hidden bg-gradient-to-br from-akbpaGreen-700 to-akbpaGreen-900 text-white py-16">
+      <div aria-hidden="true" class="bg-blob absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[480px] rounded-full bg-akbpaOrange-400/10" />
+      <div class="relative max-w-2xl mx-auto px-4 sm:px-6 text-center">
         <h2 class="text-2xl font-bold">Stay Updated</h2>
         <p class="mt-3 text-white/80">
           Subscribe to receive updates on programmes, procurement notices, food security
@@ -313,8 +337,9 @@
     </section>
 
     <!-- Final CTA -->
-    <section v-reveal class="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Join Us in Building a Food-Secure Akwa Ibom</h2>
+    <section v-reveal class="relative overflow-hidden max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
+      <div aria-hidden="true" class="bg-blob absolute -z-10 top-0 left-1/2 -translate-x-1/2 size-72 rounded-full bg-akbpaGreen-200/40 dark:bg-akbpaGreen-900/30" />
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Join Us in Building a <span class="gradient-text">Food-Secure</span> Akwa Ibom</h2>
       <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
         Whether you are a farmer, supplier, cooperative, development partner, or citizen,
         your participation contributes to a stronger, more resilient food system. Explore
@@ -407,10 +432,10 @@ const services = [
 ]
 
 const programmes = [
-  { title: 'Food Security Initiative', desc: 'Improving access to affordable food through strategic procurement and coordinated distribution.', cta: 'Learn More', to: '/how-it-works' },
-  { title: 'Farmer Partnership Programme', desc: 'Connecting local farmers with government procurement opportunities while promoting increased agricultural productivity.', cta: 'Register Today', to: '/register/farmer' },
-  { title: 'Market Stabilization Initiative', desc: 'Supporting stable food prices through strategic interventions and market intelligence.', cta: 'Explore the Programme', to: '/market-prices' },
-  { title: 'Community Food Distribution', desc: 'Working with communities to ensure equitable access to government-supported food interventions.', cta: 'Find Out More', to: '/eligibility' },
+  { title: 'Food Security Initiative', desc: 'Improving access to affordable food through strategic procurement and coordinated distribution.', cta: 'Learn More', to: '/how-it-works', icon: 'i-lucide-shield-check' },
+  { title: 'Farmer Partnership Programme', desc: 'Connecting local farmers with government procurement opportunities while promoting increased agricultural productivity.', cta: 'Register Today', to: '/register/farmer', icon: 'i-lucide-sprout' },
+  { title: 'Market Stabilization Initiative', desc: 'Supporting stable food prices through strategic interventions and market intelligence.', cta: 'Explore the Programme', to: '/market-prices', icon: 'i-lucide-line-chart' },
+  { title: 'Community Food Distribution', desc: 'Working with communities to ensure equitable access to government-supported food interventions.', cta: 'Find Out More', to: '/eligibility', icon: 'i-lucide-users' },
 ]
 
 const whyChoose = [
@@ -470,12 +495,12 @@ const faqTeasers = [
 ]
 
 const statStrip = [
-  { label: 'Farmers and Agricultural Partners Engaged', target: 24000, suffix: '+' },
-  { label: 'Local Government Areas Covered', target: 31, suffix: '' },
-  { label: 'Registered Food Suppliers', target: 150, suffix: '+' },
-  { label: 'Strategic Distribution Centres', target: 50, suffix: '+' },
-  { label: 'Households Reached Through Food Support', target: 120000, suffix: '+' },
-  { label: 'Days of Continuous Market Monitoring', target: 365, suffix: '' },
+  { label: 'Farmers and Agricultural Partners Engaged', target: 24000, suffix: '+', icon: 'i-lucide-sprout' },
+  { label: 'Local Government Areas Covered', target: 31, suffix: '', icon: 'i-lucide-map' },
+  { label: 'Registered Food Suppliers', target: 150, suffix: '+', icon: 'i-lucide-truck' },
+  { label: 'Strategic Distribution Centres', target: 50, suffix: '+', icon: 'i-lucide-warehouse' },
+  { label: 'Households Reached Through Food Support', target: 120000, suffix: '+', icon: 'i-lucide-home' },
+  { label: 'Days of Continuous Market Monitoring', target: 365, suffix: '', icon: 'i-lucide-calendar-check' },
 ]
 
 const statBgs = ['bg-amber-50', 'bg-akbpaGreen-50', 'bg-orange-50', 'bg-emerald-50', 'bg-akbpaGreen-50', 'bg-amber-50']
