@@ -55,7 +55,8 @@
             security, supporting local agriculture, ensuring transparent procurement, and
             improving access to affordable food through efficient and accountable public service.
           </p>
-          <div class="flex items-center gap-3 mt-4">
+          <p class="font-semibold text-sm mt-5 mb-3">Connect With Us</p>
+          <div class="flex items-center gap-3">
             <a v-for="s in socials" :key="s.label" href="#" :aria-label="s.label" class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20">
               <UIcon :name="s.icon" class="size-4" />
             </a>
@@ -97,7 +98,7 @@
             <li>Uyo, Akwa Ibom State</li>
             <li>Telephone: +234 XXX XXX XXXX</li>
             <li>Email: info@aksbpa.gov.ng</li>
-            <li>Working Hours: Mon–Fri, 8:00 a.m.–4:00 p.m.</li>
+            <li>Working Hours: Monday–Friday, 8:00 a.m.–4:00 p.m.</li>
           </ul>
         </div>
       </div>

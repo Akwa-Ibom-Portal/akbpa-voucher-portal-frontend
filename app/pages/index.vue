@@ -223,6 +223,7 @@
         </div>
         <UButton to="/news" variant="outline" color="primary" class="pill-btn px-5">View All News</UButton>
       </div>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Latest Articles</p>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <NuxtLink v-for="(n, i) in news" :key="n" to="/news" v-reveal="(i % 3) * 100">
           <UCard class="hover-lift h-full">
