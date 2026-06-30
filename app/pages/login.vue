@@ -5,7 +5,7 @@
         <UIcon name="i-lucide-user" class="size-5" />
       </div>
       <div>
-        <p class="font-semibold text-gray-900 dark:text-white text-sm">AKBPA Food Voucher Portal</p>
+        <p class="font-semibold text-gray-900 dark:text-white text-sm">AKSBPA Food Voucher Portal</p>
         <p class="text-xs text-gray-500">Sign in to continue</p>
       </div>
     </div>

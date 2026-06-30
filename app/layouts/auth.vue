@@ -4,8 +4,8 @@
     <div class="w-full max-w-3xl">
       <div class="flex flex-col items-center mb-8">
         <img src="/images/akwa-ibom-logo.jpeg" alt="Government of Akwa Ibom State" class="h-16 w-16 rounded-full object-cover shadow-md" />
-        <h1 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">AKBPA Food Voucher Portal</h1>
-        <p class="text-sm text-gray-500">Akwa Ibom Bulk Purchase Agency</p>
+        <h1 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">AKSBPA Food Voucher Portal</h1>
+        <p class="text-sm text-gray-500">Akwa Ibom State Bulk Purchase Agency</p>
       </div>
       <UCard :ui="{ root: 'shadow-xl ring-1 ring-gray-200 dark:ring-gray-800' }">
         <slot />

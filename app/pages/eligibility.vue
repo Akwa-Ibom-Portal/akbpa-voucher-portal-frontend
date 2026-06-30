@@ -31,7 +31,7 @@
 
     <UCard class="bg-akbpaGreen-50 dark:bg-akbpaGreen-950 border-none text-center">
       <p class="font-semibold text-gray-900 dark:text-white">Think you should be on the Social Register?</p>
-      <p class="text-sm text-gray-500 mt-1">Contact your Ward PA or the AKBPA office in your LGA to confirm your registration status.</p>
+      <p class="text-sm text-gray-500 mt-1">Contact your Ward PA or the AKSBPA office in your LGA to confirm your registration status.</p>
     </UCard>
   </div>
 </template>

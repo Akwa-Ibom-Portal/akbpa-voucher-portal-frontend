@@ -19,7 +19,10 @@
 
     <UCard class="mt-10 text-center bg-akbpaGreen-50 dark:bg-akbpaGreen-950 border-none">
       <p class="font-semibold text-gray-900 dark:text-white">Still have questions?</p>
-      <p class="text-sm text-gray-500 mt-1">Reach out to AKBPA or speak with your Ward PA.</p>
+      <p class="text-sm text-gray-500 mt-1">
+        <NuxtLink to="/contact" class="text-akbpaGreen-700 hover:underline">Contact the Agency</NuxtLink>
+        or speak with your Ward PA.
+      </p>
     </UCard>
   </div>
 </template>
@@ -87,6 +90,31 @@ const faqs = [
     icon: 'i-lucide-circle-help',
     label: 'Where do I take the food vouchers for redemption?',
     content: 'To the Food Agent located in your markets or shops. There you will hand over the voucher and collect the quantity of food written against it.',
+  },
+  {
+    icon: 'i-lucide-circle-help',
+    label: 'Who can register with the Agency?',
+    content: "Eligible farmers, cooperatives, suppliers, processors, and approved organizations may register through the Agency's registration portal.",
+  },
+  {
+    icon: 'i-lucide-circle-help',
+    label: 'How do I become a government supplier?',
+    content: "Complete the supplier registration process, submit the required documentation, and meet the Agency's accreditation requirements.",
+  },
+  {
+    icon: 'i-lucide-circle-help',
+    label: 'Where are food redemption centres located?',
+    content: 'Our Redemption Centre Locator provides information on approved centres across the State.',
+  },
+  {
+    icon: 'i-lucide-circle-help',
+    label: 'How can I report a complaint?',
+    content: 'Complaints may be submitted through our online complaint portal, email, telephone, or by visiting our office.',
+  },
+  {
+    icon: 'i-lucide-circle-help',
+    label: 'Where can I access procurement opportunities?',
+    content: 'Current procurement opportunities are published in the Procurement section of this website.',
   },
 ]
 </script>

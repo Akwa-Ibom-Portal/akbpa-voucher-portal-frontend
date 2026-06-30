@@ -11,7 +11,7 @@ export type UserRole =
 export const USER_ROLES: { value: UserRole; label: string; description: string }[] = [
   { value: 'Super Admin', label: 'Super Admin', description: 'Manage users, roles, locations, settings, and audit logs' },
   { value: 'AKBPA Admin', label: 'AKBPA Admin', description: 'Generate batches, receive vouchers, allocate vouchers, and view reports' },
-  { value: 'Voucher Receiving Officer', label: 'Voucher Receiving Officer', description: 'Receive generated physical vouchers into AKBPA inventory and mark missing/damaged vouchers' },
+  { value: 'Voucher Receiving Officer', label: 'Voucher Receiving Officer', description: 'Receive generated physical vouchers into AKSBPA inventory and mark missing/damaged vouchers' },
   { value: 'LGA Voucher Officer', label: 'LGA Voucher Officer', description: 'Manage vouchers assigned to one LGA and allocate onward to wards or officers' },
   { value: 'Ward PA / Issuing Officer', label: 'Ward PA / Issuing Officer', description: 'Issue vouchers for assigned ward or wards' },
   { value: 'Redemption Officer', label: 'Redemption Officer', description: 'Validate and redeem issued vouchers' },

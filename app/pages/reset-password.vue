@@ -2,7 +2,7 @@
   <div>
     <div v-if="!done">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Set a new password</h2>
-      <p class="text-sm text-gray-500 mb-6">Choose a new password for your AKBPA Portal account.</p>
+      <p class="text-sm text-gray-500 mb-6">Choose a new password for your AKSBPA Portal account.</p>
 
       <UForm :state="form" class="space-y-4" @submit="onSubmit">
         <UFormField label="New password" name="password">

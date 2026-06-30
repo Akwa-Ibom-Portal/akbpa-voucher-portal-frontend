@@ -26,19 +26,19 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Welcome to AKBPA Food Voucher Portal',
+      title: 'Welcome to AKSBPA Food Voucher Portal',
       htmlAttrs: { lang: 'en' },
       meta: [
-        { name: 'description', content: 'The official AKBPA Food Voucher Portal for Akwa Ibom State\'s Stable Food Relief Programme — secure, QR-coded rice, beans and garri vouchers delivered to Social Register beneficiaries across all 31 LGAs and 329 wards.' },
+        { name: 'description', content: 'The official AKSBPA Food Voucher Portal for Akwa Ibom State\'s Stable Food Relief Programme — secure, QR-coded rice, beans and garri vouchers delivered to Social Register beneficiaries across all 31 LGAs and 329 wards.' },
         { name: 'theme-color', content: '#004f34' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:site_name', content: 'AKBPA Food Voucher Portal' },
-        { property: 'og:title', content: 'Welcome to AKBPA Food Voucher Portal' },
+        { property: 'og:site_name', content: 'AKSBPA Food Voucher Portal' },
+        { property: 'og:title', content: 'Welcome to AKSBPA Food Voucher Portal' },
         { property: 'og:description', content: 'Secure, QR-coded food vouchers for rice, beans and garri — delivered to Social Register beneficiaries across all 31 LGAs and 329 wards of Akwa Ibom State.' },
         { property: 'og:image', content: '/images/hero-1.jpg' },
         { property: 'og:locale', content: 'en_NG' },
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: 'Welcome to AKBPA Food Voucher Portal' },
+        { name: 'twitter:title', content: 'Welcome to AKSBPA Food Voucher Portal' },
         { name: 'twitter:description', content: 'Secure, QR-coded food vouchers for rice, beans and garri — delivered to Social Register beneficiaries across Akwa Ibom State.' },
         { name: 'twitter:image', content: '/images/hero-1.jpg' },
       ],

@@ -24,7 +24,7 @@
         <p class="text-sm text-akbpaGreen-800 dark:text-akbpaGreen-200">
           Vouchers are valid for <strong>3 months</strong> from issue. Each beneficiary may
           receive one voucher per food item per programme cycle. Lost or expired vouchers
-          should be reported to your Ward PA or the AKBPA office.
+          should be reported to your Ward PA or the AKSBPA office.
         </p>
       </div>
     </UCard>

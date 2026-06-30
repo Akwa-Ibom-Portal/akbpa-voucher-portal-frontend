@@ -1,4 +1,9 @@
-import axios, { type AxiosError } from 'axios'
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+
+/** Tags each outgoing request with whether it carried a session token, so the 401
+ *  handler below can tell "your session expired" apart from "this endpoint needs
+ *  auth and you were never logged in" (e.g. the public site's anonymous form posts). */
+type AxiosRequestConfigWithToken = InternalAxiosRequestConfig & { _hadToken?: boolean }
 
 /**
  * Single shared axios instance for the whole app. Auth token is read straight from the
@@ -9,9 +14,12 @@ import axios, { type AxiosError } from 'axios'
  * axios error boilerplate — they can still show an inline message too (e.g. for a form
  * field), but no longer have to in order for the failure to be visible.
  *
- * A 401 (not authenticated / token expired) always clears the session and bounces to
- * /login — except for the login request itself, whose "wrong credentials" 401 is handled
- * inline by the login form.
+ * A 401 on a request that actually carried a session token clears the session and bounces
+ * to /login (except the login request itself, whose "wrong credentials" 401 is handled
+ * inline by the login form). A 401 on a request with no token — e.g. the public marketing
+ * site's unauthenticated form endpoints — never meant there was a session to expire, so it
+ * just surfaces as a normal failed-request toast instead of bouncing an anonymous visitor
+ * to the staff login screen.
  */
 function errorMessage(error: AxiosError): string {
   if (!error.response) return 'Network error — please check your connection and try again.'
@@ -33,6 +41,7 @@ export default defineNuxtPlugin(() => {
   axiosInstance.interceptors.request.use((req) => {
     const token = useCookie<string | null>('akbpa_token').value
     if (token) req.headers.Authorization = `Bearer ${token}`
+    ;(req as AxiosRequestConfigWithToken)._hadToken = !!token
     return req
   })
 
@@ -40,7 +49,8 @@ export default defineNuxtPlugin(() => {
     (res) => res,
     (error: AxiosError) => {
       const isLoginRequest = error.config?.url?.includes('/auth/login')
-      const isUnauthorized = error.response?.status === 401
+      const hadToken = !!(error.config as AxiosRequestConfigWithToken | undefined)?._hadToken
+      const isUnauthorized = error.response?.status === 401 && hadToken
 
       if (isUnauthorized && !isLoginRequest) {
         useCookie('akbpa_token').value = null

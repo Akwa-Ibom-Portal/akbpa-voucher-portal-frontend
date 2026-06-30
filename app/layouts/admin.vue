@@ -5,7 +5,7 @@
       <div class="h-16 flex items-center gap-3 px-5 border-b border-gray-200 dark:border-gray-800">
         <img src="/images/akwa-ibom-logo.jpeg" alt="Government of Akwa Ibom State" class="h-9 w-9 rounded-full object-cover" />
         <div class="leading-tight">
-          <p class="font-semibold text-gray-900 dark:text-white text-sm">AKBPA Portal</p>
+          <p class="font-semibold text-gray-900 dark:text-white text-sm">AKSBPA Portal</p>
           <p class="text-xs text-gray-500">Voucher Administration</p>
         </div>
       </div>
@@ -37,7 +37,7 @@
           <div class="h-16 flex items-center gap-3 px-5 border-b border-gray-200 dark:border-gray-800">
             <img src="/images/akwa-ibom-logo.jpeg" alt="Government of Akwa Ibom State" class="h-9 w-9 rounded-full object-cover" />
             <div class="leading-tight">
-              <p class="font-semibold text-gray-900 dark:text-white text-sm">AKBPA Portal</p>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">AKSBPA Portal</p>
               <p class="text-xs text-gray-500">Voucher Administration</p>
             </div>
           </div>
@@ -71,7 +71,7 @@
         <div class="flex items-center gap-2 lg:hidden">
           <UButton color="neutral" variant="ghost" icon="i-lucide-menu" @click="mobileNavOpen = true" />
           <img src="/images/akwa-ibom-logo.jpeg" alt="" class="h-8 w-8 rounded-full object-cover" />
-          <span class="font-semibold text-sm hidden sm:inline">AKBPA Portal</span>
+          <span class="font-semibold text-sm hidden sm:inline">AKSBPA Portal</span>
         </div>
         <h1 class="hidden lg:block text-sm font-medium text-gray-500">
           {{ roleLabel }}
