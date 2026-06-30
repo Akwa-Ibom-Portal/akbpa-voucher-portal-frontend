@@ -8,7 +8,7 @@
 
     <section class="max-w-3xl mx-auto px-4 sm:px-6 py-16 grid sm:grid-cols-3 gap-6">
       <UCard class="sm:col-span-2">
-        <UForm :state="form" class="space-y-4" @submit="onSubmit">
+        <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
           <UFormField label="Full Name" name="name" required>
             <UInput v-model="form.name" class="w-full" />
           </UFormField>
@@ -52,9 +52,18 @@ useSeoMeta({
   description: 'Report a complaint or concern to the Akwa Ibom State Bulk Purchase Agency.',
 })
 
+import { z } from 'zod'
 import { submitInquiry } from '~/services/submissionsApi'
 
 const categories = ['Voucher / Redemption Issue', 'Procurement Concern', 'Supplier / Farmer Issue', 'Staff Conduct', 'Other']
+
+const schema = z.object({
+  name: z.string().trim().min(2, 'Enter your name'),
+  phone: optionalPhoneSchema,
+  email: optionalEmailSchema,
+  category: z.string().min(1),
+  details: z.string().trim().min(10, 'Please provide at least 10 characters describing the issue'),
+})
 
 const form = reactive({ name: '', phone: '', email: '', category: categories[0]!, details: '' })
 const submitting = ref(false)

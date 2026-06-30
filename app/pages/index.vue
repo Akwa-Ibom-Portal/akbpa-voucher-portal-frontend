@@ -519,6 +519,11 @@ const newsletterEmail = ref('')
 const subscribing = ref(false)
 
 async function onSubscribe() {
+  const result = emailSchema.safeParse(newsletterEmail.value)
+  if (!result.success) {
+    toast.add({ title: 'Enter a valid email address', color: 'error' })
+    return
+  }
   subscribing.value = true
   try {
     await submitInquiry({ type: 'newsletter_subscription', email: newsletterEmail.value })

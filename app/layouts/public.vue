@@ -12,11 +12,9 @@
 
         <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
           <NuxtLink to="/" class="hover:text-akbpaGreen-600">Home</NuxtLink>
-          <NuxtLink to="/about" class="hover:text-akbpaGreen-600">About Us</NuxtLink>
+          <NuxtLink to="/about" class="hover:text-akbpaGreen-600">About</NuxtLink>
           <NuxtLink to="/programmes" class="hover:text-akbpaGreen-600">Programmes</NuxtLink>
-          <NuxtLink to="/procurement" class="hover:text-akbpaGreen-600">Procurement</NuxtLink>
           <NuxtLink to="/news" class="hover:text-akbpaGreen-600">News</NuxtLink>
-          <NuxtLink to="/gallery" class="hover:text-akbpaGreen-600">Gallery</NuxtLink>
           <NuxtLink to="/faq" class="hover:text-akbpaGreen-600">FAQs</NuxtLink>
           <NuxtLink to="/contact" class="hover:text-akbpaGreen-600">Contact</NuxtLink>
         </nav>
@@ -124,11 +122,9 @@ watch(() => route.path, () => { mobileMenuOpen.value = false })
 
 const mobileNavItems = [
   { label: 'Home', to: '/' },
-  { label: 'About Us', to: '/about' },
+  { label: 'About', to: '/about' },
   { label: 'Programmes', to: '/programmes' },
-  { label: 'Procurement', to: '/procurement' },
   { label: 'News', to: '/news' },
-  { label: 'Gallery', to: '/gallery' },
   { label: 'FAQs', to: '/faq' },
   { label: 'Contact', to: '/contact' },
 ]

@@ -30,7 +30,7 @@
           <p class="font-semibold text-gray-900 dark:text-white">Register Your Interest</p>
           <p class="text-xs text-gray-500 mt-1">A member of our Farmer Partnerships team will reach out to complete your registration.</p>
         </template>
-        <UForm :state="form" class="space-y-4" @submit="onSubmit">
+        <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
           <UFormField label="Full Name / Cooperative Name" name="name" required>
             <UInput v-model="form.name" class="w-full" />
           </UFormField>
@@ -63,7 +63,16 @@ useSeoMeta({
   description: 'Register as a farmer with the Akwa Ibom State Bulk Purchase Agency to access procurement opportunities and strengthen your agricultural production.',
 })
 
+import { z } from 'zod'
 import { submitInquiry } from '~/services/submissionsApi'
+
+const schema = z.object({
+  name: z.string().trim().min(2, 'Enter your name or cooperative name'),
+  phone: phoneSchema,
+  email: optionalEmailSchema,
+  lga: z.string().trim().min(2, 'Enter your Local Government Area'),
+  commodity: z.string().min(1),
+})
 
 const benefits = [
   'Access to structured government procurement opportunities.',

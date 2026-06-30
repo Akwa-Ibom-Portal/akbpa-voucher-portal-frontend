@@ -29,7 +29,7 @@
           <p class="font-semibold text-gray-900 dark:text-white">Start Your Application</p>
           <p class="text-xs text-gray-500 mt-1">Our Procurement and Supply Chain team will follow up with the required documentation checklist.</p>
         </template>
-        <UForm :state="form" class="space-y-4" @submit="onSubmit">
+        <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
           <UFormField label="Business / Cooperative Name" name="businessName" required>
             <UInput v-model="form.businessName" class="w-full" />
           </UFormField>
@@ -72,7 +72,17 @@ const steps = [
   'Receive confirmation and access to current procurement opportunities.',
 ]
 
+import { z } from 'zod'
 import { submitInquiry } from '~/services/submissionsApi'
+
+const schema = z.object({
+  businessName: z.string().trim().min(2, 'Enter your business or cooperative name'),
+  contactPerson: z.string().trim().min(2, 'Enter a contact person'),
+  phone: phoneSchema,
+  email: emailSchema,
+  rcNumber: z.string().optional(),
+  commodity: z.string().min(1),
+})
 
 const form = reactive({ businessName: '', contactPerson: '', phone: '', email: '', rcNumber: '', commodity: 'Rice' })
 const submitting = ref(false)
