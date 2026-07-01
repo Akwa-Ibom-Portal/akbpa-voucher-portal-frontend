@@ -278,7 +278,7 @@ function formatDateTime(val?: string) {
 
 function voucherStatusColor(status: string) {
   if (status === 'Redeemed') return 'success'
-  if (status === 'Issued') return 'warning'
+  if (status === 'Issued') return 'primary'
   if (status === 'Expired' || status === 'Cancelled') return 'error'
   return 'neutral'
 }

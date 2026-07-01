@@ -26,7 +26,7 @@
             </div>
             <div class="h-2.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex">
               <div class="bg-akbpaGreen-500" :style="{ width: pct(statusCount(row, 'Redeemed'), row.total) + '%' }" />
-              <div class="bg-akbpaGreen-200" :style="{ width: pct(statusCount(row, 'Issued'), row.total) + '%' }" />
+              <div class="bg-amber-400" :style="{ width: pct(statusCount(row, 'Issued'), row.total) + '%' }" />
             </div>
           </div>
           <p v-if="!reportsStore.byItem.length" class="text-sm text-gray-400">No voucher activity recorded yet.</p>

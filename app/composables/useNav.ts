@@ -16,7 +16,7 @@ export const navItems: NavItem[] = [
   { label: 'Receive Vouchers', to: '/vouchers/batches/receive', icon: 'i-lucide-package-check', roles: ['Super Admin', 'AKBPA Admin', 'Voucher Receiving Officer'] },
   { label: 'Allocate Vouchers', to: '/vouchers/allocate', icon: 'i-lucide-send', roles: ['Super Admin', 'AKBPA Admin', 'LGA Voucher Officer'] },
   { label: 'Issue Voucher', to: '/vouchers/issue', icon: 'i-lucide-ticket', roles: ['Ward PA / Issuing Officer'] },
-  { label: 'Scan / Redeem', to: '/redemption/scan', icon: 'i-lucide-scan-line', roles: ['Redemption Officer'] },
+  { label: 'Scan / Redeem', to: '/redemption/scan', icon: 'i-lucide-scan-line', roles: ['Redemption Officer', 'Ward PA / Issuing Officer'] },
   { label: 'Reports', to: '/reports', icon: 'i-lucide-bar-chart-3', roles: ['Super Admin', 'AKBPA Admin', 'Ward PA / Issuing Officer', 'Viewer / Auditor'] },
   { label: 'Audit Logs', to: '/audit-logs', icon: 'i-lucide-shield-check', roles: ['Super Admin'] },
   { label: 'Users', to: '/users', icon: 'i-lucide-user-cog', roles: ['Super Admin'] },

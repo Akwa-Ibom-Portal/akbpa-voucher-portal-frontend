@@ -15,7 +15,10 @@
     <!-- Scan view -->
     <div v-if="!scanResult">
       <UFormField label="Ward" class="text-white/80">
-        <USelect v-model="wardId" :items="wardOptions" placeholder="Select the ward" class="w-full" @update:model-value="onWardChange" />
+        <div v-if="isWardPA" class="rounded-lg bg-white/5 px-3 py-2 text-sm">
+          {{ lgaStore.wardName(wardId) || 'Your ward' }}
+        </div>
+        <USelect v-else v-model="wardId" :items="wardOptions" placeholder="Select the ward" class="w-full" @update:model-value="onWardChange" />
       </UFormField>
 
       <UFormField label="Beneficiary presenting the voucher" class="text-white/80 mt-3">
@@ -92,19 +95,27 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'scanner', middleware: ['auth', 'role'], role: ['Redemption Officer'] })
+definePageMeta({ layout: 'scanner', middleware: ['auth', 'role'], role: ['Redemption Officer', 'Ward PA / Issuing Officer'] })
 
 import { QrcodeStream } from 'vue-qrcode-reader'
 import type { Beneficiary, FoodItem } from '~/types'
 import type { ValidateScanResult } from '~/services/voucherRedemptionsApi'
 
+const auth = useAuthStore()
 const lgaStore = useLgaStore()
 const beneficiariesStore = useBeneficiariesStore()
 const redemptionsStore = useVoucherRedemptionsStore()
 
+const isWardPA = computed(() => auth.role === 'Ward PA / Issuing Officer')
+
 onMounted(async () => {
-  await lgaStore.ensureLoaded()
-  await redemptionsStore.fetchRedemptions()
+  try { await auth.fetchMe() } catch {}
+  try { await lgaStore.ensureLoaded() } catch {}
+  if (isWardPA.value) {
+    const myWardId = auth.user?.wardIds?.[0]
+    if (myWardId) wardId.value = myWardId
+  }
+  try { await redemptionsStore.fetchRedemptions() } catch {}
 })
 
 const wardOptions = computed(() => lgaStore.wards.map(w => ({ label: `${w.name} · ${lgaStore.lgaName(w.lgaId)}`, value: w.id })))

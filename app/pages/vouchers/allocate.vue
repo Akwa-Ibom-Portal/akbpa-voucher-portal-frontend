@@ -756,6 +756,8 @@ async function onSubmit() {
       lastRecipientLabel.value = recipientLabel.value
       step.value = 5
     } else {
+      // Re-fetch so the right-panel ledger, LGA breakdown, and batch status update immediately
+      await Promise.all([allocationsStore.fetchAllocations(), batchesStore.fetchBatches()])
       advancedSubmitted.value = true
       targets.value = [{ wardId: '', quantity: 100 }]
       singleQuantity.value = 500

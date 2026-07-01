@@ -6,10 +6,12 @@
         <p class="text-sm text-gray-500">{{ store.pagination.total.toLocaleString() }} beneficiaries matching current filters</p>
       </div>
       <div class="flex gap-2">
-        <UButton to="/beneficiaries/upload" icon="i-lucide-upload" color="neutral" variant="outline">Upload CSV</UButton>
-        <UButton to="/beneficiaries/add" icon="i-lucide-plus">Add Beneficiary</UButton>
+        <UButton v-if="auth.role !== 'Ward PA / Issuing Officer'" to="/beneficiaries/upload" icon="i-lucide-upload" color="neutral" variant="outline">Upload CSV</UButton>
+        <UButton v-if="auth.role !== 'Ward PA / Issuing Officer'" to="/beneficiaries/add" icon="i-lucide-plus">Add Beneficiary</UButton>
       </div>
     </div>
+
+    <UAlert v-if="noWardError" color="error" variant="subtle" icon="i-lucide-shield-alert" :title="noWardError" class="mb-2" />
 
     <UCard>
       <div class="flex flex-wrap items-end gap-3 mb-4">
@@ -56,13 +58,25 @@ const lgaStore = useLgaStore()
 const lgaFilterName = ref('All LGAs')
 const lgaOptionNames = computed(() => ['All LGAs', ...lgaStore.lgas.map(l => l.name)])
 
-onMounted(async () => {
-  await lgaStore.ensureLoaded()
+const noWardError = ref('')
 
-  // Ward PA is hard-scoped to their own ward — enforced here client-side and must
-  // also be enforced server-side from the JWT claim, never trusted from the request alone.
-  if (auth.role === 'Ward PA / Issuing Officer' && auth.user?.wardIds?.[0]) {
-    store.wardFilter = auth.user.wardIds[0]
+onMounted(async () => {
+  try { await auth.fetchMe() } catch (err) {
+    console.warn('[beneficiaries] fetchMe error:', err)
+  }
+  try { await lgaStore.ensureLoaded() } catch {
+    // Ward PA may not have permission to list all LGAs — carry on regardless
+  }
+
+  if (auth.role === 'Ward PA / Issuing Officer') {
+    const wardId = auth.user?.wardIds?.[0]
+    if (import.meta.dev) console.info('[beneficiaries] wardPA wardId:', wardId, 'user:', auth.user)
+    if (wardId) {
+      store.wardFilter = wardId
+    } else {
+      noWardError.value = 'Your account has no ward assigned. Contact an administrator to assign you to a ward before you can view beneficiaries.'
+      return
+    }
   }
   await store.fetchBeneficiaries({ page: 1 })
 })

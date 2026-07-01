@@ -15,9 +15,9 @@ export async function issueVoucher(dto: IssueVoucherDto): Promise<VoucherIssuanc
   return normalizeIssuance(body.issuance ?? body)
 }
 
-export async function listIssuances(): Promise<VoucherIssuance[]> {
+export async function listIssuances(params: { wardId?: string } = {}): Promise<VoucherIssuance[]> {
   const { http } = useHttp()
-  const { data } = await http.get('/voucher-issuances')
+  const { data } = await http.get('/voucher-issuances', { params: { wardId: params.wardId || undefined } })
   const body = data.data ?? data
   const list = body.issuances ?? body
   return list.map(normalizeIssuance)

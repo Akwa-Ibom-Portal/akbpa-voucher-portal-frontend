@@ -7,11 +7,11 @@ export const useVoucherIssuancesStore = defineStore('voucherIssuances', () => {
   const loading = ref(false)
   const error = ref('')
 
-  async function fetchIssuances() {
+  async function fetchIssuances(wardId?: string) {
     loading.value = true
     error.value = ''
     try {
-      issuances.value = await voucherIssuancesApi.listIssuances()
+      issuances.value = await voucherIssuancesApi.listIssuances({ wardId })
     } catch (e: any) {
       error.value = e.message ?? 'Failed to load issuances'
     } finally {

@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen flex bg-gray-50 dark:bg-gray-950">
+  <div class="h-screen overflow-hidden flex bg-gray-50 dark:bg-gray-950">
     <!-- Sidebar (desktop) -->
-    <aside class="hidden lg:flex flex-col w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <aside class="hidden lg:flex flex-col w-64 h-full border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
       <div class="h-16 flex items-center gap-3 px-5 border-b border-gray-200 dark:border-gray-800">
         <img src="/images/akwa-ibom-logo.jpeg" alt="Government of Akwa Ibom State" class="h-9 w-9 rounded-full object-cover" />
         <div class="leading-tight">
@@ -65,7 +65,7 @@
       </template>
     </USlideover>
 
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 h-full">
       <!-- Topbar -->
       <header class="h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between px-4 sm:px-6">
         <div class="flex items-center gap-2 lg:hidden">

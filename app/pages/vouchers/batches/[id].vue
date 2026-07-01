@@ -130,7 +130,7 @@ const stages = computed(() => summary.value ? [
   { label: 'Generated',        value: summary.value.quantityGenerated,  labelClass: 'text-gray-500',        valueClass: 'text-gray-900 dark:text-white' },
   { label: 'Received',         value: summary.value.quantityReceived,   labelClass: 'text-blue-500',        valueClass: 'text-blue-700 dark:text-blue-300' },
   { label: 'Allocated',        value: summary.value.quantityAllocated,  labelClass: 'text-indigo-500',      valueClass: 'text-indigo-700 dark:text-indigo-300' },
-  { label: 'Issued',           value: summary.value.quantityIssued,     labelClass: 'text-yellow-600',      valueClass: 'text-yellow-700 dark:text-yellow-300' },
+  { label: 'Issued',           value: summary.value.quantityIssued,     labelClass: 'text-akbpaGreen-600',  valueClass: 'text-akbpaGreen-700 dark:text-akbpaGreen-300' },
   { label: 'Redeemed',         value: summary.value.quantityRedeemed,   labelClass: 'text-green-600',       valueClass: 'text-green-700 dark:text-green-300' },
   { label: 'Expired',          value: summary.value.quantityExpired,    labelClass: 'text-red-500',         valueClass: 'text-red-600 dark:text-red-400' },
   { label: 'Cancelled',        value: summary.value.quantityCancelled,  labelClass: 'text-red-400',         valueClass: 'text-red-500 dark:text-red-400' },
@@ -182,7 +182,8 @@ function batchStatusColor(status: string) {
 
 function voucherStatusColor(status: string) {
   if (status === 'Redeemed') return 'success'
-  if (status === 'Issued' || status === 'Allocated' || status === 'PartlyAllocated') return 'warning'
+  if (status === 'Issued') return 'primary'
+  if (status === 'Allocated' || status === 'PartlyAllocated') return 'warning'
   if (status === 'Expired' || status === 'Cancelled' || status === 'Missing' || status === 'Damaged') return 'error'
   if (status === 'Received') return 'info'
   return 'neutral'
