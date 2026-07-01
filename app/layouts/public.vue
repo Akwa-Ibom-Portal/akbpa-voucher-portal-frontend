@@ -67,6 +67,7 @@
           <p class="font-semibold text-sm mb-3">Quick Links</p>
           <ul class="space-y-2 text-sm text-white/70">
             <li><NuxtLink to="/about" class="hover:text-akbpaOrange-300">About Us</NuxtLink></li>
+            <li><NuxtLink to="/board-of-directors" class="hover:text-akbpaOrange-300">Board of Directors</NuxtLink></li>
             <li><NuxtLink to="/#services" class="hover:text-akbpaOrange-300">Services</NuxtLink></li>
             <li><NuxtLink to="/programmes" class="hover:text-akbpaOrange-300">Programmes</NuxtLink></li>
             <li><NuxtLink to="/procurement" class="hover:text-akbpaOrange-300">Procurement</NuxtLink></li>

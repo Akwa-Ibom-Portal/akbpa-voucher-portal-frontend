@@ -12,9 +12,15 @@
         class="absolute inset-0 z-0"
         :ui="{ root: 'h-full', viewport: 'h-full', container: 'h-full', item: 'h-full' }"
       >
-        <img :src="item" alt="" class="w-full h-full object-cover" />
+        <img
+          :src="item.src"
+          :style="item.transform ? { transform: item.transform } : {}"
+          alt=""
+          class="w-full h-full object-cover"
+        />
       </UCarousel>
-      <div class="absolute inset-0 z-[1] bg-gradient-to-r from-akbpaGreen-900/95 via-akbpaGreen-900/80 to-akbpaGreen-900/50" />
+      <!-- Gradient reduced so images show through — still dark enough on the left for text legibility -->
+      <div class="absolute inset-0 z-[1] bg-gradient-to-r from-akbpaGreen-900/80 via-akbpaGreen-900/55 to-akbpaGreen-900/20" />
       <div aria-hidden="true" class="bg-blob absolute z-[1] -top-24 -right-24 size-[420px] rounded-full bg-akbpaOrange-400/30" />
       <div aria-hidden="true" class="bg-blob absolute z-[1] bottom-0 left-1/3 size-[320px] rounded-full bg-akbpaGreen-300/20" />
 
@@ -329,10 +335,17 @@
           Subscribe to receive updates on programmes, procurement notices, food security
           initiatives, market reports, and important announcements.
         </p>
-        <form class="mt-6 flex flex-col sm:flex-row gap-3 justify-center" @submit.prevent="onSubscribe">
-          <UInput v-model="newsletterEmail" type="email" placeholder="Email Address" size="lg" class="w-full sm:w-80" required />
-          <UButton type="submit" size="lg" color="secondary" class="pill-btn px-6" :loading="subscribing">Subscribe</UButton>
-        </form>
+        <div class="relative mt-6">
+          <form class="flex flex-col sm:flex-row gap-3 justify-center" @submit.prevent="onSubscribe">
+            <UInput v-model="newsletterEmail" type="email" placeholder="Email Address" size="lg" class="w-full sm:w-80" required />
+            <UButton type="submit" size="lg" color="secondary" class="pill-btn px-6" :loading="subscribing">Subscribe</UButton>
+          </form>
+          <!-- No-collection overlay -->
+          <div class="absolute inset-0 -inset-x-4 z-10 rounded-xl backdrop-blur-sm bg-akbpaGreen-900/75 flex items-center justify-center gap-3 px-6 py-4 text-center">
+            <UIcon name="i-lucide-clock" class="size-5 text-white/60 shrink-0" />
+            <p class="text-sm text-white/90 font-medium">We do not collect information at this moment — check back soon.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -398,11 +411,13 @@ useHead({
   ],
 })
 
-const heroBackgrounds: string[] = [
-  '/images/hero-1.jpg',
-  '/images/hero-2.jpg',
-  '/images/hero-3.jpg',
-  '/images/hero-4.jpeg',
+interface HeroSlide { src: string; transform?: string }
+
+const heroBackgrounds: HeroSlide[] = [
+  { src: '/images/hero-1.jpg' },
+  { src: '/images/hero-2.jpg' },
+  { src: '/images/hero-3.jpg' }, // AKSBPA truck — shows well with lighter overlay
+  { src: '/images/hero-4.jpeg', transform: 'scale(1.15) translateX(15%)' }, // governor face shifts right, away from text
 ]
 
 const governorImages: string[] = [

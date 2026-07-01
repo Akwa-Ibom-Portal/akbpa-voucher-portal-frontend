@@ -204,11 +204,12 @@
         ensures compliance with statutory requirements, and fosters collaboration with
         key stakeholders to achieve the Agency's objectives.
       </p>
-      <UAlert
-        color="info" variant="subtle" icon="i-lucide-image" class="mt-5"
-        title="Leadership profiles coming soon"
-        description="Leadership profiles, photographs, and official biographies will be published on this page as appointments are confirmed."
-      />
+      <div class="mt-6 flex flex-wrap gap-3">
+        <UButton to="/board-of-directors" color="primary" class="pill-btn px-5" icon="i-lucide-users">
+          View Board of Directors
+        </UButton>
+      </div>
+      <p class="text-xs text-gray-400 mt-4">Individual leadership profiles and biographies will be published as appointments are confirmed.</p>
     </section>
 
     <!-- Departments -->

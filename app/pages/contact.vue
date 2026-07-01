@@ -8,6 +8,7 @@
 
     <section class="max-w-5xl mx-auto px-4 sm:px-6 py-16 grid lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
+        <div class="relative">
         <UCard>
           <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
             <div class="grid sm:grid-cols-2 gap-4">
@@ -29,6 +30,15 @@
             <UButton type="submit" block size="lg" :loading="submitting">Send Message</UButton>
           </UForm>
         </UCard>
+        <!-- No-collection overlay -->
+        <div class="absolute inset-0 z-10 rounded-xl backdrop-blur-sm bg-white/80 dark:bg-gray-900/85 flex flex-col items-center justify-center gap-3 text-center p-8">
+          <div class="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <UIcon name="i-lucide-clock" class="size-7 text-gray-400" />
+          </div>
+          <p class="text-lg font-bold text-gray-900 dark:text-white">We do not collect information at this moment</p>
+          <p class="text-sm text-gray-500 max-w-xs">Check back soon — this contact form will be active shortly.</p>
+        </div>
+        </div>
       </div>
 
       <div class="space-y-5">

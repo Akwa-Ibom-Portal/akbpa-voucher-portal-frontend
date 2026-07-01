@@ -7,7 +7,8 @@
     />
 
     <section class="max-w-3xl mx-auto px-4 sm:px-6 py-16 grid sm:grid-cols-3 gap-6">
-      <UCard class="sm:col-span-2">
+      <div class="sm:col-span-2 relative">
+      <UCard>
         <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
           <UFormField label="Full Name" name="name" required>
             <UInput v-model="form.name" class="w-full" />
@@ -31,6 +32,15 @@
           <UButton type="submit" block size="lg" :loading="submitting">Submit Report</UButton>
         </UForm>
       </UCard>
+      <!-- No-collection overlay -->
+      <div class="absolute inset-0 z-10 rounded-xl backdrop-blur-sm bg-white/80 dark:bg-gray-900/85 flex flex-col items-center justify-center gap-3 text-center p-8">
+        <div class="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <UIcon name="i-lucide-clock" class="size-7 text-gray-400" />
+        </div>
+        <p class="text-lg font-bold text-gray-900 dark:text-white">We do not collect information at this moment</p>
+        <p class="text-sm text-gray-500 max-w-xs">To report an issue, please use any of the contact channels listed alongside this form.</p>
+      </div>
+      </div>
 
       <UCard class="bg-akbpaGreen-50 dark:bg-akbpaGreen-950 border-none">
         <p class="font-semibold text-gray-900 dark:text-white text-sm mb-3">Other Ways to Reach Us</p>

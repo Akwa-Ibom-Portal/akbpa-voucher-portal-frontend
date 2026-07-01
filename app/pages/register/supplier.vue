@@ -24,11 +24,12 @@
         </p>
       </div>
 
-      <UCard>
-        <template #header>
-          <p class="font-semibold text-gray-900 dark:text-white">Start Your Application</p>
-          <p class="text-xs text-gray-500 mt-1">Our Procurement and Supply Chain team will follow up with the required documentation checklist.</p>
-        </template>
+      <div class="relative">
+        <UCard>
+          <template #header>
+            <p class="font-semibold text-gray-900 dark:text-white">Start Your Application</p>
+            <p class="text-xs text-gray-500 mt-1">Our Procurement and Supply Chain team will follow up with the required documentation checklist.</p>
+          </template>
         <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
           <UFormField label="Business / Cooperative Name" name="businessName" required>
             <UInput v-model="form.businessName" class="w-full" />
@@ -52,7 +53,16 @@
           <UAlert v-if="error" color="error" variant="subtle" :title="error" />
           <UButton type="submit" block size="lg" :loading="submitting">Submit Application</UButton>
         </UForm>
-      </UCard>
+        </UCard>
+        <!-- Not-yet-open overlay -->
+        <div class="absolute inset-0 z-10 rounded-xl backdrop-blur-sm bg-white/80 dark:bg-gray-900/85 flex flex-col items-center justify-center gap-3 text-center p-8">
+          <div class="h-14 w-14 rounded-full bg-akbpaOrange-50 dark:bg-akbpaOrange-950 flex items-center justify-center">
+            <UIcon name="i-lucide-lock-keyhole" class="size-7 text-akbpaOrange-500" />
+          </div>
+          <p class="text-lg font-bold text-gray-900 dark:text-white">This opportunity is not yet open</p>
+          <p class="text-sm text-gray-500 max-w-xs">Supplier accreditation will open soon. Check back for updates.</p>
+        </div>
+      </div>
     </section>
   </div>
 </template>
