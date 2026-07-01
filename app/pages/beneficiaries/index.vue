@@ -90,7 +90,7 @@ const columns = [
   { accessorKey: 'beneficiary', header: 'Beneficiary' },
   { accessorKey: 'gender', header: 'Gender' },
   { accessorKey: 'lgaWard', header: 'LGA / Ward' },
-  { accessorKey: 'householdSize', header: 'Household Size' },
+  { accessorKey: 'address', header: 'Address', cell: ({ row }: any) => row.original.address || '—' },
   { accessorKey: 'status', header: 'Status' },
 ]
 </script>

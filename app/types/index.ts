@@ -77,16 +77,29 @@ export interface Beneficiary {
   beneficiaryCode: string
   fullName: string
   gender: 'Male' | 'Female'
+  dateOfBirth?: string
   phone?: string
   lgaId: string
   lgaName?: string
+  lgaCode?: string
   wardId: string
   wardName?: string
+  wardCode?: string
   address?: string
   community?: string
   householdSize?: number
+  householdReferenceNo?: string
+  memberReferenceNo?: string
+  householdNumber?: string
+  relationship?: string
+  labourType?: string
+  sourceFile?: string
+  socialRegisterPart?: string
+  socialRegisterRowNumber?: string
+  socialRegisterImportedAt?: string
   status: BeneficiaryStatus
   createdAt?: string
+  updatedAt?: string
 }
 
 export interface BeneficiaryVoucherHistoryEntry {
@@ -111,7 +124,7 @@ export interface PagedResult<T> {
 }
 
 /** voucher_batches.status as returned by the live API (no spaces, unlike the Developer Guide's prose). */
-export type BatchStatus = 'Generated' | 'PartlyAllocated' | 'Allocated' | 'Closed' | 'Cancelled'
+export type BatchStatus = 'Generated' | 'Received' | 'PartlyAllocated' | 'Allocated' | 'Closed' | 'Cancelled'
 
 export interface VoucherBatch {
   id: string

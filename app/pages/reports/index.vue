@@ -13,7 +13,19 @@
 
     <UCard>
       <div class="grid sm:grid-cols-3 gap-3">
-        <USelect v-model="reportsStore.programmeCycleId" :items="cycleOptions" placeholder="All Programme Cycles" @change="reportsStore.fetchAll()" />
+        <USelect :model-value="reportsStore.programmeCycleId || '__all__'" :items="cycleOptions" @update:model-value="(v: string) => { reportsStore.programmeCycleId = v === '__all__' ? '' : v; reportsStore.fetchAll() }">
+          <template #trailing>
+            <UBadge v-if="selectedReportCycle" :color="selectedReportCycle.isActive ? 'success' : 'neutral'" variant="subtle" size="sm">
+              {{ selectedReportCycle.isActive ? 'Active' : 'Inactive' }}
+            </UBadge>
+            <UIcon name="i-lucide-chevrons-up-down" class="size-4 shrink-0 text-dimmed" />
+          </template>
+          <template #item-trailing="{ item }">
+            <UBadge v-if="(item as any).isActive !== undefined" :color="(item as any).isActive ? 'success' : 'neutral'" variant="subtle" size="sm">
+              {{ (item as any).isActive ? 'Active' : 'Inactive' }}
+            </UBadge>
+          </template>
+        </USelect>
       </div>
       <div class="flex justify-end mt-3">
         <UButton color="neutral" variant="outline" icon="i-lucide-rotate-ccw" @click="resetFilters">Reset Filters</UButton>
@@ -75,12 +87,18 @@ onMounted(async () => {
   await reportsStore.fetchAll()
 })
 
-const cycleOptions = computed(() => [{ label: 'All Programme Cycles', value: '' }, ...cyclesStore.cycles.map(c => ({ label: c.name, value: c.id }))])
+const cycleOptions = computed(() => [
+  { label: 'All Programme Cycles', value: '__all__' },
+  ...([...cyclesStore.cycles].sort((a, b) => Number(b.isActive) - Number(a.isActive)).map(c => ({ label: c.name, value: c.id, isActive: c.isActive }))),
+])
+
+const selectedReportCycle = computed(() => cyclesStore.cycles.find(c => c.id === reportsStore.programmeCycleId))
 
 function resetFilters() {
   reportsStore.programmeCycleId = ''
   reportsStore.fetchAll()
 }
+// store keeps '' for "no filter"; select maps '' <-> '__all__' since USelect forbids empty-string values
 
 const { page: lgaPage, total: lgaTotal, pageSize: lgaPageSize, paginated: lgaPaginated } = usePagination(() => reportsStore.byLga, 10)
 const { page: wardPage, total: wardTotal, pageSize: wardPageSize, paginated: wardPaginated } = usePagination(() => reportsStore.byWard, 10)

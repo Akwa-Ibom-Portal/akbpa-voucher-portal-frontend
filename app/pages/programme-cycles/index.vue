@@ -58,10 +58,13 @@ import type { ProgrammeCycle } from '~/types'
 const store = useProgrammeCyclesStore()
 onMounted(() => store.fetchCycles())
 
+const formatDate = (val: string | undefined) =>
+  val ? new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+
 const columns = [
   { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'startsOn', header: 'Starts On' },
-  { accessorKey: 'endsOn', header: 'Ends On' },
+  { accessorKey: 'startsOn', header: 'Starts On', cell: ({ row }: any) => formatDate(row.getValue('startsOn')) },
+  { accessorKey: 'endsOn', header: 'Ends On', cell: ({ row }: any) => formatDate(row.getValue('endsOn')) },
   { accessorKey: 'isActive', header: 'Status' },
   { id: 'actions', header: '' },
 ]

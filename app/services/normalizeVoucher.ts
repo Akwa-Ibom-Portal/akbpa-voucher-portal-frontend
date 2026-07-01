@@ -82,7 +82,7 @@ export function normalizeAllocation(raw: any): VoucherAllocation {
     wardName: raw.wardName ?? raw.ward_name ?? undefined,
     officerId: raw.officerId !== undefined ? String(raw.officerId) : (raw.officer_user_id !== undefined && raw.officer_user_id !== null ? String(raw.officer_user_id) : undefined),
     officerName: raw.officerName ?? raw.officer_name ?? undefined,
-    quantity: raw.quantity,
+    quantity: Number(raw.quantity ?? raw.quantity_allocated ?? raw.vouchers_count ?? 0),
     notes: raw.notes ?? undefined,
     allocatedBy: raw.allocatedBy !== undefined ? String(raw.allocatedBy) : (raw.allocated_by !== undefined ? String(raw.allocated_by) : undefined),
     allocatedByName: raw.allocatedByName ?? raw.allocated_by_name,
