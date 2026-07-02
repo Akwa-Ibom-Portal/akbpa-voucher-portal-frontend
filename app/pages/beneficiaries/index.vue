@@ -61,6 +61,7 @@ const lgaOptionNames = computed(() => ['All LGAs', ...lgaStore.lgas.map(l => l.n
 const noWardError = ref('')
 
 onMounted(async () => {
+  store.reset()
   try { await auth.fetchMe() } catch (err) {
     console.warn('[beneficiaries] fetchMe error:', err)
   }

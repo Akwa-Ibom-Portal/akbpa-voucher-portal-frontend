@@ -249,6 +249,7 @@ const redemptionsStore = useVoucherRedemptionsStore()
 const isWardPA = computed(() => auth.role === 'Ward PA / Issuing Officer')
 
 onMounted(async () => {
+  beneficiariesStore.reset()
   try { await auth.fetchMe() } catch {}
   try { await lgaStore.ensureLoaded() } catch {}
   if (isWardPA.value) {
@@ -270,7 +271,7 @@ function onWardChange() {
 
 watch(beneficiarySearch, async (value) => {
   if (!wardId.value || !value) return
-  await beneficiariesStore.fetchBeneficiaries({ wardId: wardId.value, search: value })
+  await beneficiariesStore.fetchBeneficiaries({ wardId: wardId.value, search: value, page: 1 })
 })
 const beneficiaryMatches = computed(() => beneficiariesStore.beneficiaries.slice(0, 8))
 

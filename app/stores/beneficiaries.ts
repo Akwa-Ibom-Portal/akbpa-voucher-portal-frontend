@@ -54,8 +54,18 @@ export const useBeneficiariesStore = defineStore('beneficiaries', () => {
     return beneficiariesApi.uploadBeneficiariesCsv(csv)
   }
 
+  function reset() {
+    search.value = ''
+    lgaFilter.value = ''
+    wardFilter.value = ''
+    genderFilter.value = 'All'
+    page.value = 1
+    beneficiaries.value = []
+    pagination.value = { page: 1, limit: 20, total: 0, pages: 1 }
+  }
+
   return {
     beneficiaries, pagination, loading, error, search, lgaFilter, wardFilter, genderFilter, page, pageSize,
-    fetchBeneficiaries, addBeneficiary, updateBeneficiary, uploadCsv,
+    fetchBeneficiaries, addBeneficiary, updateBeneficiary, uploadCsv, reset,
   }
 })

@@ -313,6 +313,7 @@ const issueEnabled = computed(() => {
 })
 
 onMounted(async () => {
+  beneficiariesStore.reset()
   try { await auth.fetchMe() } catch (err) {
     console.warn('[issue] fetchMe error:', err)
   }
