@@ -143,10 +143,10 @@
     </div>
 
     <!-- Redemption success view -->
-    <div v-else-if="justRedeemed" class="rounded-2xl bg-akbpaGreen-950 ring-2 ring-akbpaGreen-500 p-6 flex flex-col items-center text-center gap-5">
-      <div class="relative mt-2">
-        <div class="h-28 w-28 rounded-full bg-akbpaGreen-900 flex items-center justify-center">
-          <UIcon name="i-lucide-package-check" class="size-16 text-akbpaGreen-400" />
+    <div v-else-if="justRedeemed" class="py-4 flex flex-col items-center text-center gap-5">
+      <div class="relative">
+        <div class="h-28 w-28 rounded-full bg-akbpaGreen-400/20 flex items-center justify-center">
+          <UIcon name="i-lucide-circle-check" class="size-16 text-akbpaGreen-400" />
         </div>
         <span class="absolute -top-1 -right-1 flex h-5 w-5">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-akbpaGreen-400 opacity-70" />
@@ -389,6 +389,8 @@ function resetScan() {
   justRedeemed.value = null
   manualToken.value = ''
   lastToken.value = ''
-  nextTick(() => { cameraOn.value = true })
+  selectedBeneficiary.value = null
+  beneficiarySearch.value = ''
+  nextTick(() => { cameraOn.value = false })
 }
 </script>
