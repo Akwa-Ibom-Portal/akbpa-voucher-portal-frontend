@@ -52,8 +52,8 @@
           <UButton type="submit" block size="lg" :loading="submitting">Submit Registration Interest</UButton>
         </UForm>
         </UCard>
-        <!-- Not-yet-open overlay -->
-        <div class="absolute inset-0 z-10 rounded-xl backdrop-blur-sm bg-white/80 dark:bg-gray-900/85 flex flex-col items-center justify-center gap-3 text-center p-8">
+        <!-- Not-yet-open overlay (hidden when publicForms flag is on) -->
+        <div v-if="!flags.publicForms" class="absolute inset-0 z-10 rounded-xl backdrop-blur-sm bg-white/80 dark:bg-gray-900/85 flex flex-col items-center justify-center gap-3 text-center p-8">
           <div class="h-14 w-14 rounded-full bg-akbpaOrange-50 dark:bg-akbpaOrange-950 flex items-center justify-center">
             <UIcon name="i-lucide-lock-keyhole" class="size-7 text-akbpaOrange-500" />
           </div>
@@ -67,6 +67,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'public' })
+
+const flags = useFeatureFlags()
 
 useSeoMeta({
   title: 'Register as a Farmer | AKSBPA Farmer Partnership Programme',

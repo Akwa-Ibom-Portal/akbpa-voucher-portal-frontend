@@ -34,6 +34,25 @@ export async function receiveSelectedSerials(dto: ReceiveSelectedSerialsDto): Pr
   return normalizeReceiptSession(body.session ?? body)
 }
 
+export interface ReceiveExceptDto {
+  voucherBatchId: string
+  missingSerialNumbers?: string[]
+  damagedSerialNumbers?: string[]
+  notes?: string
+}
+
+export async function receiveBatchExcept(dto: ReceiveExceptDto): Promise<VoucherReceiptSession> {
+  const { http } = useHttp()
+  const { data } = await http.post('/voucher-receipts', {
+    voucherBatchId: dto.voucherBatchId,
+    missingSerialNumbers: dto.missingSerialNumbers ?? [],
+    damagedSerialNumbers: dto.damagedSerialNumbers ?? [],
+    notes: dto.notes,
+  })
+  const body = data.data ?? data
+  return normalizeReceiptSession(body.session ?? body)
+}
+
 export async function listReceiptSessions(voucherBatchId?: string): Promise<VoucherReceiptSession[]> {
   const { http } = useHttp()
   const { data } = await http.get('/voucher-receipts', { params: voucherBatchId ? { voucherBatchId } : undefined })

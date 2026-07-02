@@ -42,7 +42,7 @@
       <template #header>
         <div class="flex items-center justify-between flex-wrap gap-3">
           <p class="font-semibold text-gray-900 dark:text-white">Vouchers in this Batch</p>
-          <p class="text-xs text-gray-400">{{ filteredVouchers.length }} of {{ vouchers.length }}</p>
+          <p class="text-xs text-gray-400">{{ voucherPagination.total.toLocaleString() }} vouchers</p>
         </div>
         <div class="flex flex-wrap gap-2 mt-3">
           <UInput
@@ -50,36 +50,45 @@
             icon="i-lucide-search"
             placeholder="Search serial number…"
             class="flex-1 min-w-48"
+            @keyup.enter="onSearch"
           />
           <USelect
-            :model-value="statusFilter"
+            :model-value="statusFilter || '__all__'"
             :items="statusFilterOptions"
             class="w-44"
-            @update:model-value="(v: string) => { statusFilter = v === '__all__' ? '' : v }"
+            @update:model-value="onStatusChange"
           />
         </div>
       </template>
-      <div class="max-h-[480px] overflow-y-auto">
-        <UTable :data="filteredVouchers" :columns="voucherColumns" :loading="loadingVouchers">
-          <template #status-cell="{ row }">
-            <UBadge :color="voucherStatusColor(row.original.status)" variant="subtle">{{ row.original.status }}</UBadge>
-          </template>
-          <template #expiresOn-cell="{ row }">
-            <span v-if="isExpired(row.original.expiresOn)" class="flex items-center gap-1.5 text-red-500 font-medium text-sm">
-              <UIcon name="i-lucide-circle-alert" class="size-3.5 shrink-0" />
-              {{ formatDate(row.original.expiresOn) }} · Expired
-            </span>
-            <span v-else class="text-sm text-gray-700 dark:text-gray-300">{{ formatDate(row.original.expiresOn) }}</span>
-          </template>
-          <template #actions-cell="{ row }">
-            <UButton
-              v-if="row.original.status !== 'Cancelled' && row.original.status !== 'Redeemed'"
-              size="xs" color="error" variant="ghost" icon="i-lucide-ban"
-              :loading="cancellingSerial === row.original.serialNumber"
-              @click="onCancelVoucher(row.original.serialNumber)"
-            >Cancel</UButton>
-          </template>
-        </UTable>
+
+      <UTable :data="vouchers" :columns="voucherColumns" :loading="loadingVouchers">
+        <template #status-cell="{ row }">
+          <UBadge :color="voucherStatusColor(row.original.status)" variant="subtle">{{ row.original.status }}</UBadge>
+        </template>
+        <template #expiresOn-cell="{ row }">
+          <span v-if="isExpired(row.original.expiresOn)" class="flex items-center gap-1.5 text-red-500 font-medium text-sm">
+            <UIcon name="i-lucide-circle-alert" class="size-3.5 shrink-0" />
+            {{ formatDate(row.original.expiresOn) }} · Expired
+          </span>
+          <span v-else class="text-sm text-gray-700 dark:text-gray-300">{{ formatDate(row.original.expiresOn) }}</span>
+        </template>
+        <template #actions-cell="{ row }">
+          <UButton
+            v-if="row.original.status !== 'Cancelled' && row.original.status !== 'Redeemed'"
+            size="xs" color="error" variant="ghost" icon="i-lucide-ban"
+            :loading="cancellingSerial === row.original.serialNumber"
+            @click="onCancelVoucher(row.original.serialNumber)"
+          >Cancel</UButton>
+        </template>
+      </UTable>
+
+      <div v-if="voucherPagination.pages > 1" class="flex justify-end mt-4">
+        <UPagination
+          :page="voucherPagination.page"
+          :total="voucherPagination.total"
+          :items-per-page="voucherPagination.limit"
+          @update:page="onPageChange"
+        />
       </div>
     </UCard>
 
@@ -90,7 +99,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: ['auth', 'role'], role: ['Super Admin', 'AKBPA Admin', 'Voucher Receiving Officer', 'LGA Voucher Officer'] })
 
-import type { StatusCounts, Voucher, VoucherBatch, VoucherBatchSummary } from '~/types'
+import type { PaginationMeta, StatusCounts, Voucher, VoucherBatch, VoucherBatchSummary } from '~/types'
 import { cancelVoucherBySerial } from '~/services/vouchersApi'
 import { getInventory } from '~/services/reportsApi'
 
@@ -101,6 +110,7 @@ const batchesStore = useVoucherBatchesStore()
 const batch = ref<VoucherBatch | null>(null)
 const summary = ref<VoucherBatchSummary | null>(null)
 const vouchers = ref<Voucher[]>([])
+const voucherPagination = ref<PaginationMeta>({ page: 1, limit: 20, total: 0, pages: 1 })
 const inventory = ref<StatusCounts>({})
 const loadingVouchers = ref(false)
 const downloading = ref(false)
@@ -109,22 +119,62 @@ const cancellingSerial = ref('')
 const error = ref('')
 
 const searchRaw = ref('')
-const searchDebounced = refDebounced(searchRaw, 250)
 const statusFilter = ref('')
+
+const statusFilterOptions = [
+  { label: 'All Statuses', value: '__all__' },
+  { label: 'Generated', value: 'Generated' },
+  { label: 'Received', value: 'Received' },
+  { label: 'Allocated', value: 'Allocated' },
+  { label: 'Issued', value: 'Issued' },
+  { label: 'Redeemed', value: 'Redeemed' },
+  { label: 'Expired', value: 'Expired' },
+  { label: 'Cancelled', value: 'Cancelled' },
+  { label: 'Missing', value: 'Missing' },
+  { label: 'Damaged', value: 'Damaged' },
+]
+
+async function loadVouchers(page = 1) {
+  const id = String(route.params.id)
+  loadingVouchers.value = true
+  try {
+    const result = await batchesStore.listVouchers(id, {
+      page,
+      limit: 20,
+      search: searchRaw.value.trim() || undefined,
+      status: statusFilter.value || undefined,
+    })
+    vouchers.value = result.items
+    voucherPagination.value = result.pagination
+  } finally {
+    loadingVouchers.value = false
+  }
+}
 
 onMounted(async () => {
   const id = String(route.params.id)
   batch.value = await batchesStore.getBatch(id)
-  loadingVouchers.value = true
-  try {
-    const [s, v, inv] = await Promise.all([batchesStore.getSummary(id), batchesStore.listVouchers(id), getInventory(id)])
-    summary.value = s
-    vouchers.value = v
-    inventory.value = inv
-  } finally {
-    loadingVouchers.value = false
-  }
+  const [s, , inv] = await Promise.all([
+    batchesStore.getSummary(id),
+    loadVouchers(1),
+    getInventory(id),
+  ])
+  summary.value = s
+  inventory.value = inv
 })
+
+function onSearch() {
+  loadVouchers(1)
+}
+
+function onStatusChange(v: string) {
+  statusFilter.value = v === '__all__' ? '' : v
+  loadVouchers(1)
+}
+
+function onPageChange(page: number) {
+  loadVouchers(page)
+}
 
 const stages = computed(() => summary.value ? [
   { label: 'Generated',        value: summary.value.quantityGenerated,  labelClass: 'text-gray-500',        valueClass: 'text-gray-900 dark:text-white' },
@@ -138,23 +188,6 @@ const stages = computed(() => summary.value ? [
 ] : [])
 
 const inventoryEntries = computed(() => Object.entries(inventory.value))
-
-const statusFilterOptions = computed(() => {
-  const statuses = [...new Set(vouchers.value.map(v => v.status))]
-  return [
-    { label: 'All Statuses', value: '__all__' },
-    ...statuses.map(s => ({ label: s, value: s })),
-  ]
-})
-
-const filteredVouchers = computed(() => {
-  const q = searchDebounced.value.toUpperCase()
-  return vouchers.value.filter(v => {
-    const matchesSearch = !q || v.serialNumber.includes(q)
-    const matchesStatus = !statusFilter.value || v.status === statusFilter.value
-    return matchesSearch && matchesStatus
-  })
-})
 
 const voucherColumns = [
   { accessorKey: 'serialNumber', header: 'Serial' },
@@ -177,6 +210,7 @@ function batchStatusColor(status: string) {
   if (status === 'Allocated' || status === 'Closed') return 'success'
   if (status === 'PartlyAllocated') return 'warning'
   if (status === 'Cancelled') return 'error'
+  if (status === 'ReconciliationRequired') return 'error'
   return 'neutral'
 }
 
@@ -195,9 +229,8 @@ async function onCancelVoucher(serialNumber: string) {
   cancellingSerial.value = serialNumber
   error.value = ''
   try {
-    const updated = await cancelVoucherBySerial(serialNumber, reason)
-    const i = vouchers.value.findIndex(v => v.serialNumber === serialNumber)
-    if (i !== -1) vouchers.value[i] = updated
+    await cancelVoucherBySerial(serialNumber, reason)
+    await loadVouchers(voucherPagination.value.page)
   } catch (e: any) {
     error.value = e.response?.data?.message ?? e.message
   } finally {

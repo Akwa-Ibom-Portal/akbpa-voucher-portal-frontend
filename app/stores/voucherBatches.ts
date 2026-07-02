@@ -38,8 +38,8 @@ export const useVoucherBatchesStore = defineStore('voucherBatches', () => {
     return batch
   }
 
-  async function listVouchers(id: string): Promise<Voucher[]> {
-    return voucherBatchesApi.listBatchVouchers(id)
+  async function listVouchers(id: string, params?: Parameters<typeof voucherBatchesApi.listBatchVouchers>[1]) {
+    return voucherBatchesApi.listBatchVouchers(id, params)
   }
 
   async function getSummary(id: string): Promise<VoucherBatchSummary> {

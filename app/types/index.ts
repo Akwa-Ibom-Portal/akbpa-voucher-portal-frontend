@@ -124,7 +124,7 @@ export interface PagedResult<T> {
 }
 
 /** voucher_batches.status as returned by the live API (no spaces, unlike the Developer Guide's prose). */
-export type BatchStatus = 'Generated' | 'Received' | 'PartlyAllocated' | 'Allocated' | 'Closed' | 'Cancelled'
+export type BatchStatus = 'Generated' | 'Received' | 'PartlyAllocated' | 'Allocated' | 'Closed' | 'Cancelled' | 'ReconciliationRequired'
 
 export interface VoucherBatch {
   id: string

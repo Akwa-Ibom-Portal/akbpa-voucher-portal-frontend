@@ -24,12 +24,35 @@
       <UFormField label="Beneficiary presenting the voucher" class="text-white/80 mt-3">
         <UInput v-model="beneficiarySearch" :disabled="!wardId" placeholder="Search by name or ID" icon="i-lucide-search" class="w-full" />
       </UFormField>
-      <div v-if="beneficiarySearch && !selectedBeneficiary" class="border border-white/10 rounded-lg divide-y divide-white/10 max-h-40 overflow-y-auto mt-2">
-        <button
-          v-for="b in beneficiaryMatches" :key="b.id" type="button"
-          class="w-full text-left px-3 py-2 text-sm hover:bg-white/5"
-          @click="selectedBeneficiary = b"
-        >{{ b.fullName }} <span class="text-white/40">· {{ b.beneficiaryCode }}</span></button>
+      <div v-if="beneficiarySearch && !selectedBeneficiary" class="border border-white/10 rounded-lg mt-2 overflow-hidden">
+        <!-- Loading -->
+        <div v-if="beneficiariesStore.loading" class="flex items-center gap-2 px-3 py-3 text-sm text-white/50">
+          <UIcon name="i-lucide-loader-circle" class="size-4 animate-spin shrink-0" />
+          Searching...
+        </div>
+
+        <!-- Results -->
+        <template v-else-if="beneficiaryMatches.length">
+          <button
+            v-for="b in beneficiaryMatches" :key="b.id" type="button"
+            class="w-full text-left px-3 py-2.5 text-sm hover:bg-white/5 border-b border-white/10 last:border-0"
+            @click="selectedBeneficiary = b"
+          >
+            {{ b.fullName }} <span class="text-white/40">· {{ b.beneficiaryCode }}</span>
+          </button>
+        </template>
+
+        <!-- Empty state -->
+        <div v-else class="px-4 py-4 space-y-1">
+          <div class="flex items-center gap-2 text-rose-400">
+            <UIcon name="i-lucide-user-x" class="size-4 shrink-0" />
+            <p class="text-sm font-medium">No beneficiary found</p>
+          </div>
+          <p class="text-xs text-white/50 leading-relaxed">
+            No match for <strong class="text-white/70">{{ beneficiarySearch }}</strong> in this ward.
+            Check that the correct ward is selected, or try a different name or ID number.
+          </p>
+        </div>
       </div>
       <div v-if="selectedBeneficiary" class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 mt-2 text-sm">
         <span>{{ selectedBeneficiary.fullName }} · {{ selectedBeneficiary.beneficiaryCode }}</span>
@@ -61,24 +84,82 @@
     </div>
 
     <!-- Result view -->
-    <div v-else class="rounded-2xl p-5" :class="scanResult.valid ? 'bg-akbpaGreen-950 ring-1 ring-akbpaGreen-700' : 'bg-rose-950 ring-1 ring-rose-700'">
-      <div class="flex items-center gap-2 mb-3">
-        <UIcon :name="scanResult.valid ? 'i-lucide-check-circle-2' : 'i-lucide-x-circle'" class="size-6" :class="scanResult.valid ? 'text-akbpaGreen-400' : 'text-rose-400'" />
-        <p class="font-semibold">{{ scanResult.valid ? 'Valid Voucher' : 'Scan Rejected' }}</p>
-      </div>
-      <p class="text-sm text-white/80">{{ scanResult.message }}</p>
+    <div v-else class="rounded-2xl p-5 space-y-4" :class="scanResult.canRedeem ? 'bg-akbpaGreen-950 ring-1 ring-akbpaGreen-700' : 'bg-rose-950 ring-1 ring-rose-700'">
 
-      <div v-if="scanResult.valid && scanResult.voucher" class="mt-4 space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-white/50">Serial</span><span class="font-mono">{{ scanResult.voucher.serialNumber }}</span></div>
-        <div class="flex justify-between"><span class="text-white/50">Item</span><span>{{ scanResult.voucher.foodItem }} · {{ scanResult.voucher.bagSize }}</span></div>
-        <div class="flex justify-between"><span class="text-white/50">Status</span><span>{{ scanResult.voucher.status }}</span></div>
+      <!-- Header -->
+      <div class="flex items-center gap-2">
+        <UIcon
+          :name="scanResult.canRedeem ? 'i-lucide-check-circle-2' : 'i-lucide-x-circle'"
+          class="size-6 shrink-0"
+          :class="scanResult.canRedeem ? 'text-akbpaGreen-400' : 'text-rose-400'"
+        />
+        <p class="font-semibold">{{ scanResult.canRedeem ? 'Voucher Valid' : 'Cannot Redeem' }}</p>
       </div>
 
-      <UButton v-if="scanResult.valid" block size="lg" class="mt-5" :loading="redeeming" icon="i-lucide-package-check" @click="confirmRedemption">
+      <!-- Reason (failure only) -->
+      <p v-if="!scanResult.canRedeem && scanResult.reason" class="text-sm text-rose-300 -mt-1">
+        {{ scanResult.reason }}
+      </p>
+
+      <!-- Voucher details -->
+      <div v-if="scanResult.voucher" class="rounded-xl bg-white/5 p-4 space-y-2.5 text-sm">
+        <div class="flex justify-between gap-4">
+          <span class="text-white/50 shrink-0">Serial</span>
+          <span class="font-mono text-right">{{ scanResult.voucher.serialNumber }}</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-white/50 shrink-0">Food item</span>
+          <span>{{ scanResult.voucher.foodItem }} · {{ scanResult.voucher.bagSize }}</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-white/50 shrink-0">Status</span>
+          <span
+            class="font-semibold"
+            :class="{
+              'text-akbpaGreen-400': scanResult.voucher.status === 'Issued',
+              'text-yellow-400': scanResult.voucher.status === 'Allocated',
+              'text-rose-400': ['Cancelled', 'Missing', 'Damaged', 'Expired'].includes(scanResult.voucher.status),
+              'text-blue-400': scanResult.voucher.status === 'Redeemed',
+            }"
+          >{{ scanResult.voucher.status }}</span>
+        </div>
+        <div v-if="scanResult.voucher.expiresOn" class="flex justify-between gap-4">
+          <span class="text-white/50 shrink-0">Expires</span>
+          <span :class="isExpired(scanResult.voucher.expiresOn) ? 'text-rose-400 font-semibold' : ''">
+            {{ formatDate(scanResult.voucher.expiresOn) }}
+            <span v-if="isExpired(scanResult.voucher.expiresOn)"> · Expired</span>
+          </span>
+        </div>
+
+        <!-- Beneficiary linked to the voucher (from issuance) -->
+        <template v-if="scanResult.voucher.beneficiary">
+          <div class="border-t border-white/10 pt-2.5 flex justify-between gap-4">
+            <span class="text-white/50 shrink-0">Issued to</span>
+            <span class="text-right">{{ scanResult.voucher.beneficiary.fullName ?? scanResult.voucher.beneficiary.name }}</span>
+          </div>
+        </template>
+
+        <!-- Contextual status notes -->
+        <div v-if="scanResult.voucher.status === 'Allocated' && !scanResult.canRedeem" class="border-t border-white/10 pt-2.5">
+          <p class="text-xs text-yellow-400">
+            This voucher has been allocated to a ward but has not yet been issued to a beneficiary.
+            It must be issued before it can be redeemed.
+          </p>
+        </div>
+        <div v-else-if="scanResult.voucher.status === 'Redeemed'" class="border-t border-white/10 pt-2.5">
+          <p class="text-xs text-blue-400">This voucher has already been redeemed.</p>
+        </div>
+        <div v-else-if="scanResult.voucher.autoIssueRequired && !scanResult.canRedeem" class="border-t border-white/10 pt-2.5">
+          <p class="text-xs text-yellow-400">This voucher requires issuance before redemption can proceed.</p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <UButton v-if="scanResult.canRedeem" block size="lg" :loading="redeeming" icon="i-lucide-package-check" @click="confirmRedemption">
         Confirm Redemption · Release Bag
       </UButton>
-      <UButton block size="lg" class="mt-3" color="neutral" variant="outline" @click="resetScan">
-        {{ scanResult.valid ? 'Back to scanner' : 'Scan another' }}
+      <UButton block size="lg" color="neutral" variant="outline" @click="resetScan">
+        {{ scanResult.canRedeem ? 'Back to scanner' : 'Scan another' }}
       </UButton>
     </div>
 
@@ -172,7 +253,7 @@ async function validate(token: string) {
 }
 
 async function confirmRedemption() {
-  if (!scanResult.value?.valid || !selectedBeneficiary.value) return
+  if (!scanResult.value?.canRedeem || !selectedBeneficiary.value) return
   redeeming.value = true
   try {
     await redemptionsStore.redeemScan({
@@ -185,6 +266,14 @@ async function confirmRedemption() {
   } finally {
     redeeming.value = false
   }
+}
+
+function formatDate(val: string) {
+  return new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function isExpired(val: string) {
+  return new Date(val) < new Date()
 }
 
 function resetScan() {

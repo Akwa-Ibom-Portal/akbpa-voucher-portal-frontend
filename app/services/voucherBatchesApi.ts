@@ -1,4 +1,4 @@
-import type { FoodItem, Voucher, VoucherBatch, VoucherBatchSummary } from '~/types'
+import type { FoodItem, PagedResult, Voucher, VoucherBatch, VoucherBatchSummary } from '~/types'
 import { normalizeBatch, normalizeBatchSummary, normalizeVoucher } from '~/services/normalizeVoucher'
 
 export interface CreateBatchDto {
@@ -33,17 +33,33 @@ export async function getBatch(id: string): Promise<VoucherBatch> {
   return normalizeBatch(body.batch ?? body)
 }
 
-export async function listBatchVouchers(id: string): Promise<Voucher[]> {
+export async function listBatchVouchers(
+  id: string,
+  params: { page?: number; limit?: number; search?: string; status?: string } = {},
+): Promise<PagedResult<Voucher>> {
   const { http } = useHttp()
-  const { data } = await http.get(`/voucher-batches/${id}/vouchers`)
+  const { data } = await http.get(`/voucher-batches/${id}/vouchers`, {
+    params: {
+      page: params.page ?? 1,
+      limit: params.limit ?? 20,
+      search: params.search || undefined,
+      status: params.status || undefined,
+    },
+  })
   const body = data.data ?? data
   const list = body.vouchers ?? body
-  return list.map(normalizeVoucher)
+  return {
+    items: list.map(normalizeVoucher),
+    pagination: body.pagination ?? { page: 1, limit: list.length, total: list.length, pages: 1 },
+  }
 }
 
 export async function getBatchPdfUrl(id: string): Promise<string> {
   const { http } = useHttp()
-  const { data } = await http.get(`/voucher-batches/${id}/pdf`, { responseType: 'blob' })
+  const { data } = await http.get(`/voucher-batches/${id}/pdf`, {
+    responseType: 'blob',
+    timeout: 120_000, // PDF generation can take up to 2 minutes on cold starts
+  })
   return URL.createObjectURL(data)
 }
 

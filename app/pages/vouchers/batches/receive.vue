@@ -15,12 +15,17 @@
         </UFormField>
 
         <UFormField label="Receipt Mode" name="mode">
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-3 gap-3">
             <button
               type="button" class="p-3 rounded-xl border text-sm font-medium text-center"
               :class="mode === 'full' ? 'border-akbpaGreen-500 bg-akbpaGreen-50 dark:bg-akbpaGreen-950' : 'border-gray-200 dark:border-gray-800'"
               @click="mode = 'full'"
             >Receive Full Batch</button>
+            <button
+              type="button" class="p-3 rounded-xl border text-sm font-medium text-center"
+              :class="mode === 'except' ? 'border-akbpaGreen-500 bg-akbpaGreen-50 dark:bg-akbpaGreen-950' : 'border-gray-200 dark:border-gray-800'"
+              @click="mode = 'except'"
+            >Receive Except Missing/Damaged</button>
             <button
               type="button" class="p-3 rounded-xl border text-sm font-medium text-center"
               :class="mode === 'selected' ? 'border-akbpaGreen-500 bg-akbpaGreen-50 dark:bg-akbpaGreen-950' : 'border-gray-200 dark:border-gray-800'"
@@ -29,15 +34,24 @@
           </div>
         </UFormField>
 
-        <template v-if="mode === 'selected'">
-          <UFormField label="Received serial numbers (one per line)" name="serialNumbers">
-            <UTextarea v-model="serialNumbersText" rows="4" class="w-full" placeholder="RC-2026-000001&#10;RC-2026-000002" />
-          </UFormField>
+        <template v-if="mode === 'except'">
           <UFormField label="Missing serial numbers (one per line)" name="missingSerialNumbers">
-            <UTextarea v-model="missingText" rows="3" class="w-full" />
+            <UTextarea v-model="missingText" :rows="3" class="w-full" />
           </UFormField>
           <UFormField label="Damaged serial numbers (one per line)" name="damagedSerialNumbers">
-            <UTextarea v-model="damagedText" rows="3" class="w-full" />
+            <UTextarea v-model="damagedText" :rows="3" class="w-full" />
+          </UFormField>
+        </template>
+
+        <template v-if="mode === 'selected'">
+          <UFormField label="Received serial numbers (one per line)" name="serialNumbers">
+            <UTextarea v-model="serialNumbersText" :rows="4" class="w-full" placeholder="RC-2026-000001&#10;RC-2026-000002" />
+          </UFormField>
+          <UFormField label="Missing serial numbers (one per line)" name="missingSerialNumbers">
+            <UTextarea v-model="missingText" :rows="3" class="w-full" />
+          </UFormField>
+          <UFormField label="Damaged serial numbers (one per line)" name="damagedSerialNumbers">
+            <UTextarea v-model="damagedText" :rows="3" class="w-full" />
           </UFormField>
         </template>
 
@@ -82,7 +96,7 @@ const form = reactive({ voucherBatchId: '', notes: '' })
 watch(batchOptions, (list) => { if (!form.voucherBatchId && list[0]) form.voucherBatchId = list[0].value }, { immediate: true })
 watch(() => form.voucherBatchId, (id) => { if (id) receiptsStore.fetchSessions(id) }, { immediate: true })
 
-const mode = ref<'full' | 'selected'>('full')
+const mode = ref<'full' | 'except' | 'selected'>('full')
 const serialNumbersText = ref('')
 const missingText = ref('')
 const damagedText = ref('')
@@ -102,6 +116,13 @@ async function onSubmit() {
   try {
     if (mode.value === 'full') {
       await receiptsStore.receiveFullBatch({ voucherBatchId: form.voucherBatchId, notes: form.notes || undefined })
+    } else if (mode.value === 'except') {
+      await receiptsStore.receiveBatchExcept({
+        voucherBatchId: form.voucherBatchId,
+        missingSerialNumbers: linesOf(missingText.value),
+        damagedSerialNumbers: linesOf(damagedText.value),
+        notes: form.notes || undefined,
+      })
     } else {
       await receiptsStore.receiveSelectedSerials({
         voucherBatchId: form.voucherBatchId,

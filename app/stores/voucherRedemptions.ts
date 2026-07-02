@@ -1,17 +1,20 @@
 import { defineStore } from 'pinia'
-import type { VoucherRedemption } from '~/types'
+import type { PaginationMeta, VoucherRedemption } from '~/types'
 import * as voucherRedemptionsApi from '~/services/voucherRedemptionsApi'
 
 export const useVoucherRedemptionsStore = defineStore('voucherRedemptions', () => {
   const redemptions = ref<VoucherRedemption[]>([])
+  const pagination = ref<PaginationMeta>({ page: 1, limit: 20, total: 0, pages: 1 })
   const loading = ref(false)
   const error = ref('')
 
-  async function fetchRedemptions() {
+  async function fetchRedemptions(page = 1) {
     loading.value = true
     error.value = ''
     try {
-      redemptions.value = await voucherRedemptionsApi.listRedemptions()
+      const result = await voucherRedemptionsApi.listRedemptions({ page, limit: pagination.value.limit })
+      redemptions.value = result.items
+      pagination.value = result.pagination
     } catch (e: any) {
       error.value = e.message ?? 'Failed to load redemptions'
     } finally {
@@ -29,5 +32,5 @@ export const useVoucherRedemptionsStore = defineStore('voucherRedemptions', () =
     return redemption
   }
 
-  return { redemptions, loading, error, fetchRedemptions, validateScan, redeemScan }
+  return { redemptions, pagination, loading, error, fetchRedemptions, validateScan, redeemScan }
 })

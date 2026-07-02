@@ -18,6 +18,7 @@ export const navItems: NavItem[] = [
   { label: 'Issue Voucher', to: '/vouchers/issue', icon: 'i-lucide-ticket', roles: ['Ward PA / Issuing Officer'] },
   { label: 'Scan / Redeem', to: '/redemption/scan', icon: 'i-lucide-scan-line', roles: ['Redemption Officer', 'Ward PA / Issuing Officer'] },
   { label: 'Reports', to: '/reports', icon: 'i-lucide-bar-chart-3', roles: ['Super Admin', 'AKBPA Admin', 'Ward PA / Issuing Officer', 'Viewer / Auditor'] },
+  { label: 'Inquiries', to: '/inquiries', icon: 'i-lucide-inbox', roles: ['Super Admin', 'AKBPA Admin'] },
   { label: 'Audit Logs', to: '/audit-logs', icon: 'i-lucide-shield-check', roles: ['Super Admin'] },
   { label: 'Users', to: '/users', icon: 'i-lucide-user-cog', roles: ['Super Admin'] },
   { label: 'Locations', to: '/locations', icon: 'i-lucide-map-pin', roles: ['Super Admin'] },
@@ -25,6 +26,13 @@ export const navItems: NavItem[] = [
 
 export function useNav() {
   const auth = useAuthStore()
-  const visibleItems = computed(() => navItems.filter(i => auth.role && i.roles.includes(auth.role)))
+  const flags = useFeatureFlags()
+  const visibleItems = computed(() =>
+    navItems.filter(i => {
+      if (!auth.role || !i.roles.includes(auth.role)) return false
+      if (i.to === '/inquiries' && !flags.adminInquiries) return false
+      return true
+    }),
+  )
   return { navItems, visibleItems }
 }

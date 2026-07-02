@@ -125,7 +125,7 @@
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                       <p class="font-bold text-gray-900 dark:text-white font-mono">{{ b.batchCode }}</p>
-                      <UBadge :color="b.status === 'Generated' ? 'neutral' : b.status === 'Received' ? 'info' : 'warning'" variant="subtle" size="xs">{{ b.status === 'PartlyAllocated' ? 'Partly Allocated' : b.status }}</UBadge>
+                      <UBadge :color="b.status === 'Generated' ? 'neutral' : b.status === 'Received' ? 'info' : b.status === 'ReconciliationRequired' ? 'error' : 'warning'" variant="subtle" size="xs">{{ b.status === 'PartlyAllocated' ? 'Partly Allocated' : b.status === 'ReconciliationRequired' ? 'Reconciliation Required' : b.status }}</UBadge>
                     </div>
                     <p class="text-sm text-gray-500 mt-0.5">{{ b.foodItem }} · {{ b.bagSize }}</p>
                   </div>
@@ -580,7 +580,7 @@ const step = ref(1)
 const steps = [{ label: 'Batch' }, { label: 'Recipient' }, { label: 'Quantity' }, { label: 'Confirm' }]
 
 // ── Shared options ─────────────────────────────────────────────
-const READY_STATUSES = new Set(['Generated', 'Received', 'PartlyAllocated'])
+const READY_STATUSES = new Set(['Generated', 'Received', 'PartlyAllocated', 'ReconciliationRequired'])
 const readyBatches = computed(() =>
   batchesStore.batches.filter(b => READY_STATUSES.has(b.status) && batchRemaining(b.id) > 0),
 )

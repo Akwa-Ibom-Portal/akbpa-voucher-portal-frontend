@@ -1,4 +1,4 @@
-import type { VoucherAllocation } from '~/types'
+import type { PagedResult, VoucherAllocation } from '~/types'
 import { normalizeAllocation } from '~/services/normalizeVoucher'
 
 export interface AllocateToWardDto {
@@ -83,10 +83,13 @@ export async function allocateToOfficer(dto: AllocateToOfficerDto): Promise<Vouc
   return normalizeAllocation(body.allocation ?? body)
 }
 
-export async function listAllocations(): Promise<VoucherAllocation[]> {
+export async function listAllocations(params: { page?: number; limit?: number } = {}): Promise<PagedResult<VoucherAllocation>> {
   const { http } = useHttp()
-  const { data } = await http.get('/voucher-allocations')
+  const { data } = await http.get('/voucher-allocations', { params: { page: params.page ?? 1, limit: params.limit ?? 20 } })
   const body = data.data ?? data
   const list = body.allocations ?? body
-  return list.map(normalizeAllocation)
+  return {
+    items: list.map(normalizeAllocation),
+    pagination: body.pagination ?? { page: 1, limit: list.length, total: list.length, pages: 1 },
+  }
 }

@@ -1,17 +1,20 @@
 import { defineStore } from 'pinia'
-import type { VoucherAllocation } from '~/types'
+import type { PaginationMeta, VoucherAllocation } from '~/types'
 import * as voucherAllocationsApi from '~/services/voucherAllocationsApi'
 
 export const useVoucherAllocationsStore = defineStore('voucherAllocations', () => {
   const allocations = ref<VoucherAllocation[]>([])
+  const pagination = ref<PaginationMeta>({ page: 1, limit: 20, total: 0, pages: 1 })
   const loading = ref(false)
   const error = ref('')
 
-  async function fetchAllocations() {
+  async function fetchAllocations(page = 1) {
     loading.value = true
     error.value = ''
     try {
-      allocations.value = await voucherAllocationsApi.listAllocations()
+      const result = await voucherAllocationsApi.listAllocations({ page, limit: pagination.value.limit })
+      allocations.value = result.items
+      pagination.value = result.pagination
     } catch (e: any) {
       error.value = e.message ?? 'Failed to load allocations'
     } finally {
@@ -43,5 +46,5 @@ export const useVoucherAllocationsStore = defineStore('voucherAllocations', () =
     return allocation
   }
 
-  return { allocations, loading, error, fetchAllocations, allocateToWard, allocateToWards, allocateToLga, allocateToOfficer }
+  return { allocations, pagination, loading, error, fetchAllocations, allocateToWard, allocateToWards, allocateToLga, allocateToOfficer }
 })

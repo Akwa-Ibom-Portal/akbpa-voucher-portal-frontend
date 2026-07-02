@@ -31,5 +31,11 @@ export const useVoucherReceiptsStore = defineStore('voucherReceipts', () => {
     return session
   }
 
-  return { sessions, loading, error, fetchSessions, receiveFullBatch, receiveSelectedSerials }
+  async function receiveBatchExcept(dto: voucherReceiptsApi.ReceiveExceptDto) {
+    const session = await voucherReceiptsApi.receiveBatchExcept(dto)
+    sessions.value.unshift(session)
+    return session
+  }
+
+  return { sessions, loading, error, fetchSessions, receiveFullBatch, receiveSelectedSerials, receiveBatchExcept }
 })

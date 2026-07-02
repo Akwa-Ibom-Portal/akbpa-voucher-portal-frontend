@@ -21,6 +21,11 @@ export default defineNuxtConfig({
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api',
       apiTimeout: Number(process.env.NUXT_PUBLIC_API_TIMEOUT || 15000),
+      // Feature flags — override via env vars without redeployment
+      // Set NUXT_PUBLIC_FLAG_PUBLIC_FORMS=true to open public registration/contact forms
+      // Set NUXT_PUBLIC_FLAG_ADMIN_INQUIRIES=false to hide the Inquiries admin page
+      flagPublicForms: false,
+      flagAdminInquiries: true,
     },
   },
 
