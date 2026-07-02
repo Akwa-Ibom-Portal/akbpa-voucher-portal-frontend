@@ -14,7 +14,7 @@
     </div>
 
     <!-- Scan view -->
-    <div v-if="!scanResult" class="space-y-3">
+    <div v-if="!scanResult && !justRedeemed" class="space-y-3">
 
       <!-- Ward -->
       <div>
