@@ -39,11 +39,11 @@
           <template v-else-if="beneficiaryMatches.length">
             <button
               v-for="b in beneficiaryMatches" :key="b.id" type="button"
-              class="w-full text-left px-4 py-3.5 text-sm hover:bg-white/5 border-b border-white/10 last:border-0 flex items-center justify-between gap-4 min-h-[52px]"
+              class="w-full text-left px-4 py-3 text-sm hover:bg-white/5 border-b border-white/10 last:border-0"
               @click="selectedBeneficiary = b"
             >
-              <span class="font-medium truncate">{{ b.fullName }}</span>
-              <span class="text-white/40 text-xs shrink-0">{{ b.beneficiaryCode }}</span>
+              <p class="font-medium leading-snug">{{ b.fullName }}</p>
+              <p class="text-xs text-white/40 mt-0.5">{{ b.beneficiaryCode }}</p>
             </button>
           </template>
           <div v-else class="px-4 py-4 space-y-1">
@@ -142,8 +142,38 @@
       </div>
     </div>
 
+    <!-- Redemption success view -->
+    <div v-else-if="justRedeemed" class="rounded-2xl bg-akbpaGreen-950 ring-2 ring-akbpaGreen-500 p-6 flex flex-col items-center text-center gap-5">
+      <div class="relative mt-2">
+        <div class="h-28 w-28 rounded-full bg-akbpaGreen-900 flex items-center justify-center">
+          <UIcon name="i-lucide-package-check" class="size-16 text-akbpaGreen-400" />
+        </div>
+        <span class="absolute -top-1 -right-1 flex h-5 w-5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-akbpaGreen-400 opacity-70" />
+          <span class="relative inline-flex rounded-full h-5 w-5 bg-akbpaGreen-500" />
+        </span>
+      </div>
+      <div>
+        <p class="text-3xl font-extrabold text-white">Redeemed!</p>
+        <p class="text-akbpaGreen-300 mt-1 text-sm">{{ justRedeemed.beneficiaryName }}</p>
+      </div>
+      <div class="w-full rounded-2xl bg-white/5 px-5 py-4 text-sm space-y-2.5 text-left">
+        <div class="flex justify-between gap-4">
+          <span class="text-white/50 shrink-0">Serial</span>
+          <span class="font-mono font-bold text-right break-all">{{ justRedeemed.serialNumber }}</span>
+        </div>
+        <div class="flex justify-between gap-4">
+          <span class="text-white/50 shrink-0">Food item</span>
+          <span class="font-semibold">{{ justRedeemed.foodItem }} · {{ justRedeemed.bagSize }}</span>
+        </div>
+      </div>
+      <UButton block size="lg" class="w-full" icon="i-lucide-scan-line" @click="resetScan">
+        Scan Next Voucher
+      </UButton>
+    </div>
+
     <!-- Result view -->
-    <div v-else class="rounded-2xl p-5 space-y-4" :class="scanResult.canRedeem ? 'bg-akbpaGreen-950 ring-1 ring-akbpaGreen-700' : 'bg-rose-950 ring-1 ring-rose-700'">
+    <div v-else-if="scanResult" class="rounded-2xl p-5 space-y-4" :class="scanResult.canRedeem ? 'bg-akbpaGreen-950 ring-1 ring-akbpaGreen-700' : 'bg-rose-950 ring-1 ring-rose-700'">
 
       <div class="flex items-center gap-3">
         <div
@@ -291,6 +321,9 @@ const foodItem = ref<FoodItem>('Rice')
 const scanResult = ref<ValidateScanResult | null>(null)
 const lastToken = ref('')
 
+interface RedeemedSummary { beneficiaryName: string; serialNumber: string; foodItem: string; bagSize: string }
+const justRedeemed = ref<RedeemedSummary | null>(null)
+
 function onCameraAreaTap() {
   if (canScan.value && !cameraOn.value && !validating.value) cameraOn.value = true
 }
@@ -331,7 +364,13 @@ async function confirmRedemption() {
       beneficiaryId: selectedBeneficiary.value.id,
       wardId: wardId.value,
     })
-    resetScan()
+    justRedeemed.value = {
+      beneficiaryName: selectedBeneficiary.value.fullName,
+      serialNumber: scanResult.value.voucher?.serialNumber ?? lastToken.value,
+      foodItem: scanResult.value.voucher?.foodItem ?? foodItem.value,
+      bagSize: scanResult.value.voucher?.bagSize ?? '',
+    }
+    scanResult.value = null
   } finally {
     redeeming.value = false
   }
@@ -347,6 +386,7 @@ function isExpired(val: string) {
 
 function resetScan() {
   scanResult.value = null
+  justRedeemed.value = null
   manualToken.value = ''
   lastToken.value = ''
   nextTick(() => { cameraOn.value = true })

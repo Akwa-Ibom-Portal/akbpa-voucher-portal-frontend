@@ -75,14 +75,24 @@
           </div>
 
           <!-- Success state -->
-          <div v-if="justIssued">
-            <UAlert
-              color="success"
-              variant="subtle"
-              icon="i-lucide-circle-check"
-              title="Voucher issued successfully"
-              :description="`Serial: ${justIssued}`"
-            />
+          <div v-if="justIssued" class="py-4 flex flex-col items-center text-center gap-5">
+            <div class="relative">
+              <div class="h-24 w-24 rounded-full bg-akbpaGreen-100 dark:bg-akbpaGreen-900/50 flex items-center justify-center">
+                <UIcon name="i-lucide-circle-check" class="size-14 text-akbpaGreen-600 dark:text-akbpaGreen-400" />
+              </div>
+              <span class="absolute -top-1 -right-1 flex h-5 w-5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-akbpaGreen-400 opacity-60" />
+                <span class="relative inline-flex rounded-full h-5 w-5 bg-akbpaGreen-500" />
+              </span>
+            </div>
+            <div>
+              <p class="text-2xl font-extrabold text-gray-900 dark:text-white">Voucher Issued!</p>
+              <p class="text-sm text-gray-500 mt-1">{{ selected?.fullName }}</p>
+            </div>
+            <div class="w-full rounded-2xl bg-akbpaGreen-50 dark:bg-akbpaGreen-950/50 border border-akbpaGreen-200 dark:border-akbpaGreen-800 px-5 py-4">
+              <p class="text-xs font-semibold text-akbpaGreen-600 dark:text-akbpaGreen-400 uppercase tracking-widest mb-1">Serial Number</p>
+              <p class="font-mono text-xl font-bold text-akbpaGreen-900 dark:text-akbpaGreen-100 tracking-wide">{{ justIssued }}</p>
+            </div>
           </div>
 
           <!-- Form state -->
