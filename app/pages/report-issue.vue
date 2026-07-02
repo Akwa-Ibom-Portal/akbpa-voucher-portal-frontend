@@ -25,7 +25,7 @@
             <USelect v-model="form.category" :items="categories" class="w-full" />
           </UFormField>
           <UFormField label="Details" name="details" required>
-            <UTextarea v-model="form.details" rows="5" class="w-full" placeholder="Describe what happened, including location and date if relevant." />
+            <UTextarea v-model="form.details" :rows="5" class="w-full" placeholder="Describe what happened, including location and date if relevant." />
           </UFormField>
           <UAlert v-if="submitted" color="success" variant="subtle" title="Your report has been recorded." description="A member of our team will follow up using the contact details provided." />
           <UAlert v-if="error" color="error" variant="subtle" :title="error" />

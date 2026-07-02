@@ -23,7 +23,7 @@
               <UInput v-model="form.subject" class="w-full" />
             </UFormField>
             <UFormField label="Message" name="message" required>
-              <UTextarea v-model="form.message" rows="5" class="w-full" />
+              <UTextarea v-model="form.message" :rows="5" class="w-full" />
             </UFormField>
             <UAlert v-if="submitted" color="success" variant="subtle" title="Message sent." description="Thank you for reaching out — we'll respond as soon as possible." />
             <UAlert v-if="error" color="error" variant="subtle" :title="error" />
