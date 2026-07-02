@@ -15,6 +15,7 @@
       icon="i-lucide-search"
       placeholder="Search beneficiary by name or ID..."
       class="w-full"
+      size="lg"
       @keyup.enter="onSearch"
     />
 
@@ -35,18 +36,18 @@
       <template v-else>
         <div
           v-for="b in beneficiariesStore.beneficiaries" :key="b.id"
-          class="rounded-lg border border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between cursor-pointer hover:border-akbpaGreen-400 hover:bg-akbpaGreen-50 dark:hover:bg-akbpaGreen-950/20 transition-colors"
+          class="rounded-lg border border-gray-200 dark:border-gray-800 px-4 py-4 min-h-[64px] flex items-center justify-between cursor-pointer hover:border-akbpaGreen-400 hover:bg-akbpaGreen-50 dark:hover:bg-akbpaGreen-950/20 transition-colors active:scale-[0.99]"
           @click="openIssueModal(b)"
         >
           <div>
             <p class="font-medium text-gray-900 dark:text-white">{{ b.fullName }}</p>
-            <p class="text-xs text-gray-500">{{ b.beneficiaryCode }} · {{ b.gender }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">{{ b.beneficiaryCode }} · {{ b.gender }}</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             <UBadge :color="b.status === 'Active' ? 'success' : 'neutral'" variant="subtle" size="xs">
               {{ b.status }}
             </UBadge>
-            <UIcon name="i-lucide-chevron-right" class="text-gray-400 size-4" />
+            <UIcon name="i-lucide-chevron-right" class="text-gray-400 size-5" />
           </div>
         </div>
       </template>
@@ -65,7 +66,7 @@
     <!-- Issue modal -->
     <UModal v-model:open="modalOpen" :title="selected?.fullName ?? ''" prevent-close>
       <template #body>
-        <div class="space-y-5">
+        <div class="space-y-5 pb-2">
           <!-- Beneficiary info -->
           <div class="rounded-lg bg-gray-50 dark:bg-gray-900 px-4 py-3 text-sm space-y-0.5">
             <p class="font-medium text-gray-900 dark:text-white">{{ selected?.fullName }}</p>
@@ -74,7 +75,7 @@
           </div>
 
           <!-- Success state -->
-          <div v-if="justIssued" class="space-y-3">
+          <div v-if="justIssued">
             <UAlert
               color="success"
               variant="subtle"
@@ -82,12 +83,6 @@
               title="Voucher issued successfully"
               :description="`Serial: ${justIssued}`"
             />
-            <div class="flex gap-2">
-              <UButton class="flex-1" variant="outline" color="neutral" @click="issueAnother">
-                Issue another
-              </UButton>
-              <UButton class="flex-1" @click="closeModal">Done</UButton>
-            </div>
           </div>
 
           <!-- Form state -->
@@ -131,7 +126,7 @@
             <!-- ── SCAN mode ──────────────────────────────────── -->
             <div v-if="inputMode === 'scan'" class="space-y-3">
               <!-- Camera viewport — hidden once we have a scan result -->
-              <div v-if="!validationResult" class="relative overflow-hidden rounded-xl bg-black aspect-square max-h-72 w-full">
+              <div v-if="!validationResult" class="relative overflow-hidden rounded-xl bg-black aspect-square max-h-80 sm:max-h-96 w-full">
                 <ClientOnly>
                   <QrcodeStream
                     v-if="cameraActive"
@@ -242,23 +237,32 @@
             </UFormField>
 
             <UAlert v-if="issueError" color="error" variant="subtle" :title="issueError" />
-
-            <!-- Actions -->
-            <div class="flex gap-2 pt-1">
-              <UButton variant="outline" color="neutral" class="flex-1" :disabled="issuing" @click="closeModal">
-                Cancel
-              </UButton>
-              <UButton
-                class="flex-1"
-                icon="i-lucide-ticket"
-                :loading="issuing"
-                :disabled="!issueEnabled"
-                @click="submitIssue"
-              >
-                Issue Voucher
-              </UButton>
-            </div>
           </template>
+        </div>
+      </template>
+
+      <template #footer>
+        <!-- Shown only when not in the success state -->
+        <div v-if="!justIssued" class="flex gap-3 w-full">
+          <UButton variant="outline" color="neutral" class="flex-1" size="lg" :disabled="issuing" @click="closeModal">
+            Cancel
+          </UButton>
+          <UButton
+            class="flex-1"
+            size="lg"
+            icon="i-lucide-ticket"
+            :loading="issuing"
+            :disabled="!issueEnabled"
+            @click="submitIssue"
+          >
+            Issue Voucher
+          </UButton>
+        </div>
+        <div v-else class="flex gap-3 w-full">
+          <UButton class="flex-1" size="lg" variant="outline" color="neutral" @click="issueAnother">
+            Issue another
+          </UButton>
+          <UButton class="flex-1" size="lg" @click="closeModal">Done</UButton>
         </div>
       </template>
     </UModal>

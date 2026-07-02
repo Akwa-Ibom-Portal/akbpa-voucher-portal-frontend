@@ -1,115 +1,175 @@
 <template>
-  <div class="max-w-md mx-auto px-4 py-6 space-y-6">
-    <div>
-      <p class="text-xs text-white/60 uppercase">Distribution Point</p>
-      <p class="font-semibold">Redemption Desk</p>
-    </div>
+  <div class="max-w-md mx-auto px-4 py-6 space-y-5">
 
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-white/5 rounded-xl p-4 text-center">
-        <p class="text-2xl font-bold">{{ redemptionsStore.redemptions.length }}</p>
-        <p class="text-xs text-white/60">redeemed this session</p>
+    <!-- Context header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-white/50 uppercase tracking-wide">Distribution Point</p>
+        <p class="font-semibold text-base leading-tight">{{ wardId ? lgaStore.wardName(wardId) || 'Redemption Desk' : 'Redemption Desk' }}</p>
+      </div>
+      <div class="bg-white/5 rounded-xl px-4 py-2 text-center min-w-[72px]">
+        <p class="text-2xl font-bold leading-none">{{ redemptionsStore.redemptions.length }}</p>
+        <p class="text-xs text-white/50 mt-0.5">redeemed</p>
       </div>
     </div>
 
     <!-- Scan view -->
-    <div v-if="!scanResult">
-      <UFormField label="Ward" class="text-white/80">
-        <div v-if="isWardPA" class="rounded-lg bg-white/5 px-3 py-2 text-sm">
+    <div v-if="!scanResult" class="space-y-3">
+
+      <!-- Ward -->
+      <div>
+        <p class="text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Ward</p>
+        <div v-if="isWardPA" class="rounded-xl bg-white/5 px-4 py-3 text-sm font-medium">
           {{ lgaStore.wardName(wardId) || 'Your ward' }}
         </div>
         <USelect v-else v-model="wardId" :items="wardOptions" placeholder="Select the ward" class="w-full" @update:model-value="onWardChange" />
-      </UFormField>
+      </div>
 
-      <UFormField label="Beneficiary presenting the voucher" class="text-white/80 mt-3">
+      <!-- Beneficiary -->
+      <div>
+        <p class="text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Beneficiary presenting the voucher</p>
         <UInput v-model="beneficiarySearch" :disabled="!wardId" placeholder="Search by name or ID" icon="i-lucide-search" class="w-full" />
-      </UFormField>
-      <div v-if="beneficiarySearch && !selectedBeneficiary" class="border border-white/10 rounded-lg mt-2 overflow-hidden">
-        <!-- Loading -->
-        <div v-if="beneficiariesStore.loading" class="flex items-center gap-2 px-3 py-3 text-sm text-white/50">
-          <UIcon name="i-lucide-loader-circle" class="size-4 animate-spin shrink-0" />
-          Searching...
-        </div>
 
-        <!-- Results -->
-        <template v-else-if="beneficiaryMatches.length">
-          <button
-            v-for="b in beneficiaryMatches" :key="b.id" type="button"
-            class="w-full text-left px-3 py-2.5 text-sm hover:bg-white/5 border-b border-white/10 last:border-0"
-            @click="selectedBeneficiary = b"
-          >
-            {{ b.fullName }} <span class="text-white/40">· {{ b.beneficiaryCode }}</span>
-          </button>
-        </template>
-
-        <!-- Empty state -->
-        <div v-else class="px-4 py-4 space-y-1">
-          <div class="flex items-center gap-2 text-rose-400">
-            <UIcon name="i-lucide-user-x" class="size-4 shrink-0" />
-            <p class="text-sm font-medium">No beneficiary found</p>
+        <!-- Dropdown results -->
+        <div v-if="beneficiarySearch && !selectedBeneficiary" class="border border-white/10 rounded-xl mt-2 overflow-hidden">
+          <div v-if="beneficiariesStore.loading" class="flex items-center gap-2 px-4 py-4 text-sm text-white/50">
+            <UIcon name="i-lucide-loader-circle" class="size-4 animate-spin shrink-0" />
+            Searching...
           </div>
-          <p class="text-xs text-white/50 leading-relaxed">
-            No match for <strong class="text-white/70">{{ beneficiarySearch }}</strong> in this ward.
-            Check that the correct ward is selected, or try a different name or ID number.
-          </p>
+          <template v-else-if="beneficiaryMatches.length">
+            <button
+              v-for="b in beneficiaryMatches" :key="b.id" type="button"
+              class="w-full text-left px-4 py-3.5 text-sm hover:bg-white/5 border-b border-white/10 last:border-0 flex items-center justify-between gap-4 min-h-[52px]"
+              @click="selectedBeneficiary = b"
+            >
+              <span class="font-medium truncate">{{ b.fullName }}</span>
+              <span class="text-white/40 text-xs shrink-0">{{ b.beneficiaryCode }}</span>
+            </button>
+          </template>
+          <div v-else class="px-4 py-4 space-y-1">
+            <div class="flex items-center gap-2 text-rose-400">
+              <UIcon name="i-lucide-user-x" class="size-4 shrink-0" />
+              <p class="text-sm font-medium">No beneficiary found</p>
+            </div>
+            <p class="text-xs text-white/50 leading-relaxed">
+              No match for <strong class="text-white/70">{{ beneficiarySearch }}</strong> in this ward.
+              Check that the correct ward is selected, or try a different name or ID number.
+            </p>
+          </div>
+        </div>
+
+        <!-- Selected beneficiary chip -->
+        <div v-if="selectedBeneficiary" class="flex items-center justify-between bg-akbpaGreen-950/60 border border-akbpaGreen-800/50 rounded-xl px-4 py-3 mt-2 text-sm">
+          <div class="flex items-center gap-2 min-w-0">
+            <UIcon name="i-lucide-user-check" class="size-4 text-akbpaGreen-400 shrink-0" />
+            <span class="font-medium truncate">{{ selectedBeneficiary.fullName }}</span>
+            <span class="text-white/40 text-xs shrink-0">· {{ selectedBeneficiary.beneficiaryCode }}</span>
+          </div>
+          <UButton size="xs" color="neutral" variant="ghost" class="shrink-0 ml-2" @click="selectedBeneficiary = null; beneficiarySearch = ''">Change</UButton>
         </div>
       </div>
-      <div v-if="selectedBeneficiary" class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 mt-2 text-sm">
-        <span>{{ selectedBeneficiary.fullName }} · {{ selectedBeneficiary.beneficiaryCode }}</span>
-        <UButton size="xs" color="neutral" variant="ghost" @click="selectedBeneficiary = null">Change</UButton>
-      </div>
 
-      <UFormField label="Food item being redeemed" class="text-white/80 mt-3">
-        <USelect v-model="foodItem" :items="['Rice', 'Beans', 'Garri']" class="w-full" />
-      </UFormField>
-
-      <div class="rounded-2xl overflow-hidden bg-black aspect-square relative ring-1 ring-white/10 mt-3">
-        <ClientOnly>
-          <QrcodeStream v-if="cameraOn" @detect="onDetect" @error="onCameraError" />
-        </ClientOnly>
-        <div v-if="!cameraOn" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/50">
-          <UIcon name="i-lucide-scan-line" class="size-10" />
-          <p class="text-sm">Point camera at the voucher code</p>
+      <!-- Food item -->
+      <div>
+        <p class="text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Food item being redeemed</p>
+        <div class="flex gap-2">
+          <button
+            v-for="item in FOOD_ITEMS" :key="item"
+            type="button"
+            class="flex-1 py-3 rounded-xl border-2 text-sm font-semibold transition-colors"
+            :class="foodItem === item
+              ? 'border-akbpaGreen-500 bg-akbpaGreen-500/20 text-akbpaGreen-300'
+              : 'border-white/15 text-white/50 hover:border-white/30 hover:text-white/80'"
+            @click="foodItem = item"
+          >
+            {{ item }}
+          </button>
         </div>
       </div>
 
-      <UButton block size="lg" class="mt-4" icon="i-lucide-camera" :disabled="!canScan" @click="cameraOn = !cameraOn">
-        {{ cameraOn ? 'Stop Camera' : 'Start Camera' }}
-      </UButton>
+      <!-- Camera -->
+      <div>
+        <p class="text-xs font-semibold text-white/60 uppercase tracking-wide mb-1.5">Scan voucher QR code</p>
+        <div
+          class="rounded-2xl overflow-hidden bg-black aspect-square relative ring-1 ring-white/10 cursor-pointer"
+          @click="onCameraAreaTap"
+        >
+          <ClientOnly>
+            <QrcodeStream v-if="cameraOn && !validating" @detect="onDetect" @error="onCameraError" />
+          </ClientOnly>
 
-      <div class="flex gap-2 mt-3">
-        <UInput v-model="manualToken" :disabled="!canScan" placeholder="Or type/paste a voucher QR token" class="w-full" />
-        <UButton :loading="validating" :disabled="!canScan" @click="validate(manualToken)">Validate</UButton>
+          <!-- Validating overlay -->
+          <div v-if="validating" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-3 text-white">
+            <UIcon name="i-lucide-loader-circle" class="size-10 animate-spin" />
+            <p class="text-sm font-medium">Validating voucher...</p>
+          </div>
+
+          <!-- Idle overlay: not ready -->
+          <div v-else-if="!canScan" class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/40 p-6 text-center">
+            <UIcon name="i-lucide-scan-line" class="size-10" />
+            <p class="text-sm">Select a ward and beneficiary above to enable scanning</p>
+          </div>
+
+          <!-- Idle overlay: ready but camera off -->
+          <div v-else-if="!cameraOn" class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/60">
+            <div class="h-16 w-16 rounded-full bg-white/10 flex items-center justify-center">
+              <UIcon name="i-lucide-camera" class="size-7" />
+            </div>
+            <p class="text-sm font-medium">Tap to start camera</p>
+          </div>
+
+          <!-- Scan target corners -->
+          <div v-if="cameraOn && !validating" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="relative w-52 h-52">
+              <span class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-md" />
+              <span class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-md" />
+              <span class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-md" />
+              <span class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-md" />
+            </div>
+          </div>
+        </div>
+
+        <p v-if="cameraOn" class="text-xs text-center text-white/40 mt-2">Point at the QR code on the physical voucher</p>
+        <UButton v-if="cameraOn" block size="sm" color="neutral" variant="ghost" class="mt-2" @click="cameraOn = false">
+          Stop Camera
+        </UButton>
+      </div>
+
+      <!-- Manual fallback -->
+      <div class="flex gap-2">
+        <UInput v-model="manualToken" :disabled="!canScan" placeholder="Or paste a QR token manually" class="w-full text-sm" />
+        <UButton :loading="validating" :disabled="!canScan || !manualToken.trim()" @click="validate(manualToken)">Check</UButton>
       </div>
     </div>
 
     <!-- Result view -->
     <div v-else class="rounded-2xl p-5 space-y-4" :class="scanResult.canRedeem ? 'bg-akbpaGreen-950 ring-1 ring-akbpaGreen-700' : 'bg-rose-950 ring-1 ring-rose-700'">
 
-      <!-- Header -->
-      <div class="flex items-center gap-2">
-        <UIcon
-          :name="scanResult.canRedeem ? 'i-lucide-check-circle-2' : 'i-lucide-x-circle'"
-          class="size-6 shrink-0"
-          :class="scanResult.canRedeem ? 'text-akbpaGreen-400' : 'text-rose-400'"
-        />
-        <p class="font-semibold">{{ scanResult.canRedeem ? 'Voucher Valid' : 'Cannot Redeem' }}</p>
+      <div class="flex items-center gap-3">
+        <div
+          class="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
+          :class="scanResult.canRedeem ? 'bg-akbpaGreen-800' : 'bg-rose-900'"
+        >
+          <UIcon
+            :name="scanResult.canRedeem ? 'i-lucide-check-circle-2' : 'i-lucide-x-circle'"
+            class="size-6"
+            :class="scanResult.canRedeem ? 'text-akbpaGreen-400' : 'text-rose-400'"
+          />
+        </div>
+        <div>
+          <p class="font-bold text-base">{{ scanResult.canRedeem ? 'Voucher Valid' : 'Cannot Redeem' }}</p>
+          <p v-if="!scanResult.canRedeem && scanResult.reason" class="text-sm text-rose-300 mt-0.5">{{ scanResult.reason }}</p>
+        </div>
       </div>
 
-      <!-- Reason (failure only) -->
-      <p v-if="!scanResult.canRedeem && scanResult.reason" class="text-sm text-rose-300 -mt-1">
-        {{ scanResult.reason }}
-      </p>
-
-      <!-- Voucher details -->
-      <div v-if="scanResult.voucher" class="rounded-xl bg-white/5 p-4 space-y-2.5 text-sm">
+      <div v-if="scanResult.voucher" class="rounded-xl bg-white/5 p-4 space-y-3 text-sm">
         <div class="flex justify-between gap-4">
           <span class="text-white/50 shrink-0">Serial</span>
-          <span class="font-mono text-right">{{ scanResult.voucher.serialNumber }}</span>
+          <span class="font-mono text-right break-all">{{ scanResult.voucher.serialNumber }}</span>
         </div>
         <div class="flex justify-between gap-4">
           <span class="text-white/50 shrink-0">Food item</span>
-          <span>{{ scanResult.voucher.foodItem }} · {{ scanResult.voucher.bagSize }}</span>
+          <span class="font-medium">{{ scanResult.voucher.foodItem }} · {{ scanResult.voucher.bagSize }}</span>
         </div>
         <div class="flex justify-between gap-4">
           <span class="text-white/50 shrink-0">Status</span>
@@ -130,48 +190,45 @@
             <span v-if="isExpired(scanResult.voucher.expiresOn)"> · Expired</span>
           </span>
         </div>
-
-        <!-- Beneficiary linked to the voucher (from issuance) -->
         <template v-if="scanResult.voucher.beneficiary">
-          <div class="border-t border-white/10 pt-2.5 flex justify-between gap-4">
+          <div class="border-t border-white/10 pt-3 flex justify-between gap-4">
             <span class="text-white/50 shrink-0">Issued to</span>
             <span class="text-right">{{ scanResult.voucher.beneficiary.fullName ?? scanResult.voucher.beneficiary.name }}</span>
           </div>
         </template>
-
-        <!-- Contextual status notes -->
-        <div v-if="scanResult.voucher.status === 'Allocated' && !scanResult.canRedeem" class="border-t border-white/10 pt-2.5">
-          <p class="text-xs text-yellow-400">
-            This voucher has been allocated to a ward but has not yet been issued to a beneficiary.
-            It must be issued before it can be redeemed.
-          </p>
+        <div v-if="scanResult.voucher.status === 'Allocated' && !scanResult.canRedeem" class="border-t border-white/10 pt-3">
+          <p class="text-xs text-yellow-400">This voucher has been allocated to a ward but has not yet been issued to a beneficiary. It must be issued before it can be redeemed.</p>
         </div>
-        <div v-else-if="scanResult.voucher.status === 'Redeemed'" class="border-t border-white/10 pt-2.5">
+        <div v-else-if="scanResult.voucher.status === 'Redeemed'" class="border-t border-white/10 pt-3">
           <p class="text-xs text-blue-400">This voucher has already been redeemed.</p>
         </div>
-        <div v-else-if="scanResult.voucher.autoIssueRequired && !scanResult.canRedeem" class="border-t border-white/10 pt-2.5">
+        <div v-else-if="scanResult.voucher.autoIssueRequired && !scanResult.canRedeem" class="border-t border-white/10 pt-3">
           <p class="text-xs text-yellow-400">This voucher requires issuance before redemption can proceed.</p>
         </div>
       </div>
 
-      <!-- Actions -->
-      <UButton v-if="scanResult.canRedeem" block size="lg" :loading="redeeming" icon="i-lucide-package-check" @click="confirmRedemption">
-        Confirm Redemption · Release Bag
-      </UButton>
-      <UButton block size="lg" color="neutral" variant="outline" @click="resetScan">
-        {{ scanResult.canRedeem ? 'Back to scanner' : 'Scan another' }}
-      </UButton>
+      <div class="space-y-2">
+        <UButton v-if="scanResult.canRedeem" block size="lg" :loading="redeeming" icon="i-lucide-package-check" @click="confirmRedemption">
+          Confirm Redemption · Release Bag
+        </UButton>
+        <UButton block size="lg" color="neutral" variant="outline" @click="resetScan">
+          {{ scanResult.canRedeem ? 'Back to scanner' : 'Scan another' }}
+        </UButton>
+      </div>
     </div>
 
+    <!-- Recent redemptions -->
     <div v-if="!scanResult && redemptionsStore.redemptions.length">
-      <p class="text-xs text-white/50 uppercase mb-2 mt-6">Recent Redemptions</p>
+      <p class="text-xs text-white/50 uppercase tracking-wide mb-2">Recent this session</p>
       <div class="space-y-2">
-        <div v-for="r in redemptionsStore.redemptions.slice(0, 5)" :key="r.id" class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 text-sm">
-          <span>{{ r.serialNumber }} · {{ r.foodItem }}</span>
-          <UBadge color="success" variant="subtle">Redeemed</UBadge>
+        <div v-for="r in redemptionsStore.redemptions.slice(0, 5)" :key="r.id" class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 text-sm">
+          <span class="font-mono text-xs text-white/70">{{ r.serialNumber }}</span>
+          <span class="text-white/50">{{ r.foodItem }}</span>
+          <UBadge color="success" variant="subtle" size="xs">Redeemed</UBadge>
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -181,6 +238,8 @@ definePageMeta({ layout: 'scanner', middleware: ['auth', 'role'], role: ['Redemp
 import { QrcodeStream } from 'vue-qrcode-reader'
 import type { Beneficiary, FoodItem } from '~/types'
 import type { ValidateScanResult } from '~/services/voucherRedemptionsApi'
+
+const FOOD_ITEMS = ['Rice', 'Beans', 'Garri'] as const
 
 const auth = useAuthStore()
 const lgaStore = useLgaStore()
@@ -217,6 +276,11 @@ const beneficiaryMatches = computed(() => beneficiariesStore.beneficiaries.slice
 
 const canScan = computed(() => !!wardId.value && !!selectedBeneficiary.value)
 
+// Auto-start camera as soon as ward + beneficiary are both selected
+watch(canScan, (ready) => {
+  if (ready && !cameraOn.value) nextTick(() => { cameraOn.value = true })
+})
+
 const cameraOn = ref(false)
 const manualToken = ref('')
 const validating = ref(false)
@@ -225,6 +289,10 @@ const foodItem = ref<FoodItem>('Rice')
 
 const scanResult = ref<ValidateScanResult | null>(null)
 const lastToken = ref('')
+
+function onCameraAreaTap() {
+  if (canScan.value && !cameraOn.value && !validating.value) cameraOn.value = true
+}
 
 function onCameraError() {
   cameraOn.value = false
@@ -280,5 +348,6 @@ function resetScan() {
   scanResult.value = null
   manualToken.value = ''
   lastToken.value = ''
+  nextTick(() => { cameraOn.value = true })
 }
 </script>
